@@ -17,4 +17,4 @@ We are currently using [Nour Moustafa and Jill Slay](https://cloudstor.aarnet.ed
 - [Jarren Briscoe](https://github.com/jbroot)
 - [Max Liu](https://github.com/kolxy)
 - [Nathan Waltz](https://tornato.xyz)
-- [Big Willy](https://github.com/hillaryzhang)
+- [Hillary Zhang](https://github.com/hillaryzhang)
