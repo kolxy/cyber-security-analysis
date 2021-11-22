@@ -139,4 +139,6 @@ cython_debug/
 .h5
 h5
 
-data/*
+data/*.csv
+data/*.h5
+data/sample
