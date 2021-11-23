@@ -4,3 +4,4 @@ pandas ~= 1.2.4
 seaborn ~= 0.11.1
 tensorflow == 2.5.0
 tables==3.6.1
+stumpy~=1.10.0
