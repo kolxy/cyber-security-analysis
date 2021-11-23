@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 
 # handles the integer edge cases
-def parse_integers(x):
+def parse_integers(x: str) -> int:
     try:
         return np.int(x)
     except ValueError:
@@ -16,6 +16,7 @@ def parse_integers(x):
 @dataclass(frozen=True)
 class DataDir:
     table1 = "data/UNSW-NB15_1.csv"
+    table1h5 = "data/unsw1.h5"
     table2 = "data/UNSW-NB15_2.csv"
     table3 = "data/UNSW-NB15_3.csv"
     table4 = "data/UNSW-NB15_4.csv"
