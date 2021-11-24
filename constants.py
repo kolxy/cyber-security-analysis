@@ -69,12 +69,13 @@ class DataDir:
         'ct_flw_http_mthd': parse_integers,
         'is_ftp_login': bool,
         'ct_ftp_cmd': parse_integers,
-        'ct_src_src': parse_integers,
-        'ct_src_dst': parse_integers,
+        'ct_srv_src': parse_integers,
+        'ct_srv_dst': parse_integers,
         'ct_dst_ltm': parse_integers,
         'ct_src_ltm': parse_integers,
         'ct_src_dport_ltm': parse_integers,
         'ct_dst_sport_ltm': parse_integers,
-        'attack_cat': str,
+        'ct_dst_src_ltm': parse_integers,
+        'attack_cat': lambda x: 'None' if x == '' else str(x),
         'label': np.bool
     }

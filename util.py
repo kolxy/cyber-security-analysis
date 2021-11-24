@@ -28,6 +28,24 @@ def merge_times_into_frequency(time_array: np.ndarray, time_window: int = 60) ->
     return np.asarray(counts)
 
 
+def merge_dos_attack(time_array: np.ndarray,
+                     attack_category_array,
+                     time_window: int = 60) -> np.ndarray:
+    counts = []
+    last_time = time_array[0]
+    count = 1 if attack_category_array[0] == 'DoS' else 0
+    for index in range(1, len(time_array)):
+        total_seconds = (time_array[index] - last_time) / np.timedelta64(1, 's')
+        if total_seconds > time_window:
+            counts.append(count)
+            last_time = time_array[index]
+
+        if attack_category_array[index] == 'DoS':
+            count += 1
+
+    return np.asarray(counts)
+
+
 def get_host_connection_frequency(df: pd.DataFrame, dst_ip: str) -> pd.DataFrame:
     """
     Gets connections to a host per minute.
@@ -37,12 +55,15 @@ def get_host_connection_frequency(df: pd.DataFrame, dst_ip: str) -> pd.DataFrame
     :return: A new dataframe that contains the number of connections
     per minute to a given host.
     """
-    new_df = df[['dstip', 'stime']]
+    new_df = df[['dstip', 'stime', 'attack_cat']]
     new_df = new_df[new_df['dstip'] == dst_ip]
     new_df = new_df.drop(columns=['dstip'])
-    frequencies = merge_times_into_frequency(new_df.values.ravel())
-    times_in_seconds = np.asarray(list(map(lambda x: x * 60, range(1, len(frequencies) + 1))))
-    return pd.DataFrame({'elapsed_seconds': times_in_seconds, 'connection_frequency': frequencies})
+    attack_categories = merge_dos_attack(new_df['stime'].values.ravel(), new_df['attack_cat'].values.ravel())
+    frequencies = merge_times_into_frequency(new_df['stime'].values.ravel())
+    times_in_seconds = np.asarray(list(range(60, (len(frequencies) + 1) * 60, 60)))
+    return pd.DataFrame({'elapsed_seconds': times_in_seconds,
+                         'connection_frequency': frequencies,
+                         'dos_sum': attack_categories})
 
 
 def get_unique_hosts(df: pd.DataFrame) -> Union[np.ndarray, ExtensionArray]:
