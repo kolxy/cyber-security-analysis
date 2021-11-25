@@ -69,3 +69,19 @@ def get_host_connection_frequency(df: pd.DataFrame, dst_ip: str) -> pd.DataFrame
 
 def get_unique_hosts(df: pd.DataFrame) -> Union[np.ndarray, ExtensionArray]:
     return df['dstip'].unique()
+
+
+def convert_input_column_type(df: pd.DataFrame):
+    """
+    convert input column to all numeric types
+
+    IMPORTANT: srcip and dstip should be dropped separately
+    """
+
+    # pivot wider for string features
+    result = pd.get_dummies(df, columns=["proto", "state", "service"])
+
+    # convert time to timestamp
+    result['stime'] = result.stime.values.astype(int) // 10**9
+    result['ltime'] = result.ltime.values.astype(int) // 10**9
+    return result
