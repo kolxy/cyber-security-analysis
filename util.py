@@ -39,6 +39,7 @@ def merge_dos_attack(time_array: np.ndarray,
         if total_seconds > time_window:
             counts.append(count)
             last_time = time_array[index]
+            count = 0
 
         if attack_category_array[index] == 'DoS':
             count += 1
