@@ -4,6 +4,7 @@ import datetime as dt
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 from constants import DataDir
 
 
@@ -23,7 +24,7 @@ def main() -> None:
 
     df = df.dropna()
 
-    input_data = df.drop(['attack_cat', 'label'], axis=1)
+    input_data = df.drop(['attack_cat', 'label', 'stime', 'ltime'], axis=1)
     output_data = df['label'].astype(np.int8).to_numpy()
 
     x_train, x_test, y_train, y_test = train_test_split(input_data, output_data, test_size=0.25)
@@ -31,7 +32,12 @@ def main() -> None:
     log_reg = LogisticRegression()
     log_reg.fit(x_train, y_train)
     score = log_reg.score(x_test, y_test)
-    print(f'Accuracy score: {score:.2f}')
+    print(f'Accuracy score (logistic regression): {score:.3f}')
+
+    r_clf = RandomForestClassifier(max_depth=None, n_estimators=150)
+    r_clf.fit(x_train, y_train)
+    score = r_clf.score(x_test, y_test)
+    print(f'Accuracy score (random forest): {score:.3f}')
 
     # matrix profile shit
     # hosts = get_unique_hosts(df)
