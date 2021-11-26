@@ -2,8 +2,10 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+from tensorflow.keras.layers import Dense
+from tensorflow.keras import Sequential
 from pandas.core.arrays import ExtensionArray
-
+from tensorflow.keras.optimizers import SGD
 
 def merge_times_into_frequency(time_array: np.ndarray, time_window: int = 60) -> np.ndarray:
     """
@@ -82,7 +84,31 @@ def convert_input_column_type(df: pd.DataFrame):
     result = pd.get_dummies(df, columns=["proto", "state", "service"])
 
     # convert time to timestamp
-    if 'stime' in result.columns:
+    if 'stime' in result.columns and 'ltime' in result.columns:
         result['stime'] = result.stime.values.astype(int) // 10**9
         result['ltime'] = result.ltime.values.astype(int) // 10**9
     return result
+
+
+def create_model(x_size: int, y_size: int) -> Sequential:
+    """
+    I am creating a neural network with three layers. The first layer has an output
+    size of 200, arbitrarily. It has an input dimension equal to x_size, or the number of features
+    in x. It has one hidden layer, of size 150 arbitrarily, both of which use relu because
+    it is a reasonable thing to use. Finally, we have an output of y_size, which gets a softmax,
+    and is compiled with binary crossentropy.
+
+    :param x_size: The number of features in x.
+    :param y_size: The number of classes that there could be.
+    :return: A new model for performing predictions.
+    """
+
+    model = Sequential([
+        Dense(200, input_dim=x_size, activation='relu', kernel_initializer='uniform'),
+        Dense(150, activation='relu', kernel_initializer='uniform'),
+        Dense(y_size, activation='softmax', kernel_initializer='uniform')
+    ])
+
+    optimizer = SGD(learning_rate=0.01)
+    model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
