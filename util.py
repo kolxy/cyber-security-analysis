@@ -82,6 +82,7 @@ def convert_input_column_type(df: pd.DataFrame):
     result = pd.get_dummies(df, columns=["proto", "state", "service"])
 
     # convert time to timestamp
-    result['stime'] = result.stime.values.astype(int) // 10**9
-    result['ltime'] = result.ltime.values.astype(int) // 10**9
+    if 'stime' in result.columns:
+        result['stime'] = result.stime.values.astype(int) // 10**9
+        result['ltime'] = result.ltime.values.astype(int) // 10**9
     return result
