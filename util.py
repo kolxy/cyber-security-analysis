@@ -2,10 +2,12 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+from tensorflow.keras import losses, metrics
 from tensorflow.keras.layers import Dense
 from tensorflow.keras import Sequential
 from pandas.core.arrays import ExtensionArray
-from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.optimizers import Adam
+
 
 def merge_times_into_frequency(time_array: np.ndarray, time_window: int = 60) -> np.ndarray:
     """
@@ -85,8 +87,8 @@ def convert_input_column_type(df: pd.DataFrame):
 
     # convert time to timestamp
     if 'stime' in result.columns and 'ltime' in result.columns:
-        result['stime'] = result.stime.values.astype(int) // 10**9
-        result['ltime'] = result.ltime.values.astype(int) // 10**9
+        result['stime'] = result.stime.values.astype(int) // 10 ** 9
+        result['ltime'] = result.ltime.values.astype(int) // 10 ** 9
     return result
 
 
@@ -104,11 +106,14 @@ def create_model(x_size: int, y_size: int) -> Sequential:
     """
 
     model = Sequential([
-        Dense(200, input_dim=x_size, activation='relu', kernel_initializer='uniform'),
-        Dense(150, activation='relu', kernel_initializer='uniform'),
+        Dense(50, input_dim=x_size, activation='relu', kernel_initializer='uniform'),
+        Dense(100, activation='relu', kernel_initializer='uniform'),
         Dense(y_size, activation='softmax', kernel_initializer='uniform')
     ])
 
-    optimizer = SGD(learning_rate=0.01)
-    model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+    optimizer = Adam(learning_rate=1e-3)
+    loss = losses.CategoricalCrossentropy()
+    model.compile(optimizer=optimizer, loss=loss, metrics=[metrics.CategoricalAccuracy(),
+                                                           metrics.Precision(),
+                                                           metrics.Recall()])
     return model
