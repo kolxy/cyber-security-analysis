@@ -174,8 +174,7 @@ def reduce_features(input_data: pd.DataFrame,
     for performing shapley value analysis.
     """
     if exists(f'output/{output_data_type}_rf_classifier.joblib'):
-        clf = None
-        load(clf, f'output/{output_data_type}_rf_classifier.joblib')
+        clf = load(f'output/{output_data_type}_rf_classifier.joblib')
     else:
         clf = RandomForestClassifier(max_depth=None, n_estimators=150)
         clf = clf.fit(input_data, output_data)
