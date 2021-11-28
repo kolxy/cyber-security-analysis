@@ -1,10 +1,12 @@
 # Cyber Security Dataset Analysis Project
 
-Our goals are two-fold. We wish to perform matrix profiling on a dataset and compare its efficacy to conventional anomaly detection techniques, and test auto-encoders and compare their dimensionality reduction efficacy with PCA. 
+Our goals are two-fold. We wish to perform anomaly detection on a time series type cybersecurity dataset using a variety of methods such as matrix profiling, MLP, logistic regression, ensemble methods, and compare their efficacy (and see if matrix profiling is any use on this kind of dataset), and test auto-encoders and compare their dimensionality reduction efficacy with PCA. 
 
 ## Setup
 Modules and versions
 ```bash
+$ python -m venv venv
+$ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
