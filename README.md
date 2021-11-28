@@ -1,6 +1,6 @@
 # Cyber Security Dataset Analysis Project
 
-Our goals are two-fold. We wish to perform anomaly detection on a time series type cybersecurity dataset using a variety of methods such as matrix profiling and on a dataset and compare their efficacy (and see if matrix profiling is any use on this kind of dataset), and test auto-encoders and compare their dimensionality reduction efficacy with PCA. 
+Our goals are two-fold. We wish to perform anomaly detection on a time series type cybersecurity dataset using a variety of methods such as matrix profiling, MLP, logistic regression, ensemble methods, and compare their efficacy (and see if matrix profiling is any use on this kind of dataset), and test auto-encoders and compare their dimensionality reduction efficacy with PCA. 
 
 ## Setup
 Modules and versions
