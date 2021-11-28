@@ -34,7 +34,7 @@ if __name__ == '__main__':
     df = util.get_clean_dataframe_from_file(DataDir.all_tables)
     df = util.category_to_numeric(df)
     x, y = util.get_input_output(df, class_type='binary')
-    rf_clf, reduced_features = util.reduce_features(x, y)
+    rf_clf, reduced_features = util.reduce_features(x, y, output_data_type='binary')
     r = permutation_importance(rf_clf,
                                x,
                                y,
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     run_logistic_regression(reduced_features, y, class_type='binary')
     x, y = util.get_input_output(df, class_type='multiclass')
-    rf_clf, reduced_features = util.reduce_features(x, y)
+    rf_clf, reduced_features = util.reduce_features(x, y, output_data_type='multiclass')
     r = permutation_importance(rf_clf,
                                x,
                                y,
