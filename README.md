@@ -5,6 +5,8 @@ Our goals are two-fold. We wish to perform matrix profiling on a dataset and com
 ## Setup
 Modules and versions
 ```bash
+$ python -m venv venv
+$ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
