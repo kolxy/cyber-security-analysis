@@ -4,16 +4,15 @@ import datetime as dt
 
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.feature_selection import SelectFromModel
-from sklearn.metrics import f1_score
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.utils import np_utils
 from tensorflow.keras.callbacks import EarlyStopping
 
 from constants import DataDir
-from util import create_model
+from model_utils import create_model
 
 
 def main() -> None:
@@ -29,12 +28,14 @@ def main() -> None:
     for c in df.columns[df.dtypes == 'category']:
         df[c] = df[c].cat.codes
 
+    df = df.sort_values('stime')
+
     df['stime'] = df['stime'].map(dt.datetime.toordinal)
     df['ltime'] = df['ltime'].map(dt.datetime.toordinal)
 
     df = df.dropna()
 
-    input_data = df.drop(['attack_cat', 'label', 'stime', 'ltime'], axis=1)
+    input_data = df.drop(['attack_cat', 'label'], axis=1)
     # deal with the data type bs
     input_data = np.asarray(input_data).astype(np.float32)
 
@@ -46,48 +47,50 @@ def main() -> None:
     model = SelectFromModel(clf, prefit=True)
     input_data_reduced = model.transform(input_data)
 
-    # cv instead @kolxy (for everything but MLP)?
-    x_train, x_test, y_train, y_test = train_test_split(input_data_reduced, output_data, test_size=0.25)
-
     # using SAGA because there is a large dataset
+    scoring = ['f1_weighted', 'accuracy']
     log_reg = LogisticRegression(max_iter=500, solver='saga')
-    log_reg = log_reg.fit(x_train, y_train)
-    log_reg_pred = log_reg.predict(x_test)
-    accuracy_score = log_reg.score(x_test, y_test)
-    f1_metric_score = f1_score(log_reg_pred, y_test, average='weighted')
+    scores = cross_validate(log_reg, input_data_reduced, output_data, scoring=scoring)
+    accuracy = scores['test_accuracy']
+    f1_weighted = scores['test_f1_weighted']
 
-    print(f'Accuracy score (Logistic Regression): {accuracy_score * 100:.5f}%, f1_score: {f1_metric_score:.5f}')
+    print(f'Logistic Regression - Accuracy score (mean): {accuracy.mean() * 100:.5f}%, '
+          f'F1 Score (Weighted) (mean): {f1_weighted.mean():.5f}')
 
     r_clf = RandomForestClassifier(max_depth=None, n_estimators=150)
-    r_clf.fit(x_train, y_train)
-    r_clf_pred = r_clf.predict(x_test)
-    accuracy_score = r_clf.score(x_test, y_test)
-    f1_metric_score = f1_score(r_clf_pred, y_test, average='weighted')
-    print(f'Accuracy score (Random Forest): {accuracy_score * 100:.5f}%, f1_score: {f1_metric_score:.5f}')
+    scores = cross_validate(r_clf, input_data_reduced, output_data, scoring=scoring)
+    accuracy = scores['test_accuracy']
+    f1_weighted = scores['test_f1_weighted']
+
+    print(f'Random Forest - Accuracy score (mean): {accuracy.mean() * 100:.5f}%, '
+          f'F1 Score (Weighted) (mean): {f1_weighted.mean():.5f}')
 
     ada_clf = AdaBoostClassifier(n_estimators=150)
-    ada_clf.fit(x_train, y_train)
-    ada_clf_pred = ada_clf.predict(x_test)
-    accuracy_score = ada_clf.score(x_test, y_test)
-    f1_metric_score = f1_score(ada_clf_pred, y_test, average='weighted')
-    print(f'Accuracy score (AdaBoost): {accuracy_score * 100:.5f}%, f1_score: {f1_metric_score:.5f}')
+    scores = cross_validate(ada_clf, input_data_reduced, output_data, scoring=scoring)
+    accuracy = scores['test_accuracy']
+    f1_weighted = scores['test_f1_weighted']
+
+    print(f'AdaBoost - Accuracy score (mean): {accuracy.mean() * 100:.5f}%, '
+          f'F1 Score (Weighted) (mean): {f1_weighted.mean():.5f}')
 
     # one hot encode the stuff
     encoder = LabelEncoder()
     encoder.fit(output_data)
-    y_train = encoder.transform(y_train)
-    y_train = np_utils.to_categorical(y_train, dtype=np.int8)
-    y_test = encoder.transform(y_test)
-    y_test = np_utils.to_categorical(y_test, dtype=np.int8)
+    output_data = output_data.transform(output_data)
+    output_data = np_utils.to_categorical(output_data, dtype=np.int8)
+
+    # cv instead (for everything but MLP)?
+    x_train, x_test, y_train, y_test = train_test_split(input_data_reduced, output_data, test_size=0.25)
 
     model = create_model(x_train.shape[1], y_train.shape[1])
+    callback = EarlyStopping(monitor='loss', patience=5)
     model.fit(x_train,
               y_train,
               epochs=200,
               batch_size=500,
-              callbacks=[EarlyStopping(monitor='loss', patience=5)], verbose=0)
-    test_loss, test_accuracy = model.evaluate(x_test, y_test, batch_size=500)
-    print(f'Accuracy score (Multilayer Perceptron): {test_accuracy * 100:.5f}%, test loss: {test_loss:.5f}')
+              callbacks=[callback], verbose=0)
+    score = model.evaluate(x_test, y_test, batch_size=500)
+    print(f'Accuracy score (Multilayer Perceptron): {score[1] * 100:.5f}%, test loss: {score[0]:.5f}')
 
     # matrix profile shit
     # hosts = get_unique_hosts(df)

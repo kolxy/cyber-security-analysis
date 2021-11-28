@@ -76,6 +76,6 @@ class DataDir:
         'ct_src_dport_ltm': parse_integers,
         'ct_dst_sport_ltm': parse_integers,
         'ct_dst_src_ltm': parse_integers,
-        'attack_cat': lambda x: 'None' if x == '' else str(x),
-        'label': bool
+        'attack_cat': lambda x: 'Benign' if x == '' else str(x),
+        'label': parse_integers
     }

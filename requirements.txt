@@ -3,6 +3,7 @@ numpy == 1.19.5
 pandas ~= 1.2.4
 seaborn ~= 0.11.1
 tensorflow == 2.5.0
-tables==3.6.1
-stumpy~=1.10.0
-scikit-learn~=1.0.1
+tables == 3.6.1
+scikit-learn ~= 1.0.1
+shap ~= 0.40.0
+joblib ~= 1.1.0
