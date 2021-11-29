@@ -30,9 +30,9 @@ class DataDir:
     # data types that are used in each column
     d_types = {
         'srcip': str,
-        'sport': parse_integers,
+        'sport': str,
         'dstip': str,
-        'dsport': parse_integers,
+        'dsport': str,
         'proto': str,
         'state': str,
         'dur': np.single,

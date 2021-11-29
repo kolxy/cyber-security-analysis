@@ -115,6 +115,38 @@ def get_clean_dataframe_from_file(filename: str,
     return df
 
 
+def get_unmodified_dataframe_from_file(filename: str,
+                                       method='h5',
+                                       key='df') -> pd.DataFrame:
+    """
+    Returns a clean dataframe using a specific method. Supports reading from
+    CSV as well as .h5 file.
+
+    :param filename: The name of the file.
+    :param method: The method (h5|csv) for reading the file, in this case, we default
+    to using .h5 for reading in our data.
+    :param key: H5 ONLY - Where the data is located in the .h5 file.
+    :return: The dataframe found at the filename (sorted by time)
+    """
+    if method == 'h5':
+        df = pd.DataFrame(pd.read_hdf(filename,
+                                      key=key,
+                                      mode='r'))
+    elif method == 'csv':
+        df = pd.read_csv(filename,
+                         header=None,
+                         index_col=False,
+                         names=DataDir.d_types.keys(),
+                         converters=DataDir.d_types)
+    else:
+        raise ValueError(f'Invalid method: {method}. Use either csv or h5')
+
+    df = df.sort_values('stime')
+
+    return df
+
+
+
 def category_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
     """
     Converts all categorical data to from strings to numbers.

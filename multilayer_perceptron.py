@@ -24,7 +24,7 @@ def run_mlp_classification(input_data: pd.DataFrame,
                             solver='adam',
                             learning_rate_init=1e-3,
                             early_stopping=True)
-    cv = KFold(n_splits=10, random_state=42, shuffle=True)
+    cv = KFold(n_splits=5, random_state=42, shuffle=True)
     scores = cross_validate(mlp_clf, input_data, output_data, scoring=scoring, cv=cv, n_jobs=-1)
     accuracy = scores['test_accuracy']
     f1_weighted = scores['test_f1_weighted']

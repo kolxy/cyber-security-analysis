@@ -20,7 +20,7 @@ def run_logistic_regression(input_data: pd.DataFrame,
     # using SAGA because there is a large dataset
     scoring = ['f1_weighted', 'accuracy']
     log_reg = LogisticRegression(max_iter=500, solver='saga')
-    cv = KFold(n_splits=10, random_state=42, shuffle=True)
+    cv = KFold(n_splits=5, random_state=42, shuffle=True)
     scores = cross_validate(log_reg, input_data, output_data, scoring=scoring, cv=cv, n_jobs=-1)
     accuracy = scores['test_accuracy']
     f1_weighted = scores['test_f1_weighted']

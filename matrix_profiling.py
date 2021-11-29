@@ -3,14 +3,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from constants import DataDir
-from util import get_clean_dataframe_from_file, get_host_connection_frequency
+from util import get_unmodified_dataframe_from_file, get_host_connection_frequency
 
-df = get_clean_dataframe_from_file(DataDir.all_tables)
-hosts = df.unique('dstip')
+df = get_unmodified_dataframe_from_file(DataDir.all_tables)
+hosts = df['dstip'].unique()
 connection_frequencies = get_host_connection_frequency(df, hosts[0])
-profile_by_minutes = 25
-print(df['attack_cat'].head)
-print(df.dtypes)
+profile_by_minutes = 20
 profile = mp.compute(connection_frequencies['connection_frequency'].values, profile_by_minutes, n_jobs=-1)
 profile = mp.discover.discords(profile)
 
