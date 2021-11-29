@@ -212,3 +212,20 @@ def reduce_features(input_data: pd.DataFrame,
         dump(clf, f'output/{output_data_type}_rf_classifier.joblib')
 
     return clf, SelectFromModel(clf, prefit=True).transform(input_data)
+
+def convert_input_column_type(df: pd.DataFrame):
+    """
+    equivalent to pivot_wider() in R
+    convert input column to all numeric types
+
+    IMPORTANT: srcip and dstip should be dropped separately
+    """
+
+    # pivot wider for string features
+    result = pd.get_dummies(df, columns=["proto", "state", "service"])
+
+    # convert time to timestamp
+    if 'stime' in result.columns:
+        result['stime'] = result.stime.values.astype(int) // 10**9
+        result['ltime'] = result.ltime.values.astype(int) // 10**9
+    return result
