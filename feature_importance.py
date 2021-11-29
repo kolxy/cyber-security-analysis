@@ -21,9 +21,9 @@ def compute_feature_importance(input_data: pd.DataFrame,
     # https://scikit-learn.org/stable/modules/permutation_importance.html#permutation-importance
     for i in r.importances_mean.argsort()[::-1]:
         if r.importances_mean[i] - 2 * r.importances_std[i] > 0:
-            print(f'{df.columns[i]:<8}'
-                  f'{r.importances_mean[i]:.3f}'
-                  f'+/- {r.importances_std[i]:.3f}')
+            print(f'{df.columns[i]:<16}'
+                  f'{r.importances_mean[i]:.5f}'
+                  f'+/- {r.importances_std[i]:.5f}')
 
 
 if __name__ == '__main__':

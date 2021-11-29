@@ -115,7 +115,7 @@ def get_clean_dataframe_from_file(filename: str,
     return df
 
 
-def get_unmodified_dataframe_from_file(filename: str,
+def get_mp_dataframe_from_file(filename: str,
                                        method='h5',
                                        key='df') -> pd.DataFrame:
     """
@@ -144,7 +144,6 @@ def get_unmodified_dataframe_from_file(filename: str,
     df = df.sort_values('stime')
 
     return df
-
 
 
 def category_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
