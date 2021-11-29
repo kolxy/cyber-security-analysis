@@ -19,7 +19,7 @@ def run_mlp_classification(input_data: pd.DataFrame,
     :return: Nothing, a "pure" IO operation.
     """
     scoring = ['f1_weighted', 'accuracy']
-    mlp_clf = MLPClassifier(hidden_layer_sizes=(50, 50, 50),
+    mlp_clf = MLPClassifier(hidden_layer_sizes=(50, 50),
                             activation='relu',
                             solver='adam',
                             learning_rate_init=1e-3,
