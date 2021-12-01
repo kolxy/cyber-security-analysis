@@ -77,9 +77,9 @@ def run_logistic_regression(x_train,
                              solver='saga',
                              max_iter=1000,
                              n_jobs=-1)
-    print("Fitting")
+    print(f"Fitting - reduced? {reduced} - class type? {class_type}")
     clf.fit(x_train, y_train)
-    print("Predicting")
+    print(f"Predicting - reduced? {reduced} - class type? {class_type}")
     predict = clf.predict(x_test)
     print("Generating confusion matrix")
     cm = confusion_matrix(y_test, predict)
