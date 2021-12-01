@@ -21,7 +21,7 @@ def main():
     # Binary PCA
 
     # use training data for prediction
-    x_train, y_train = util.get_input_output_pca_regular(training, class_type='binary')
+    x_train, y_train = util.get_input_output(training, class_type='binary')
 
     # scale the data for use with PCA
     scaler = StandardScaler()
@@ -37,7 +37,7 @@ def main():
     # Multiclass PCA
 
     # use training data for prediction
-    x_train, y_train = util.get_input_output_pca_regular(training, class_type='multiclass')
+    x_train, y_train = util.get_input_output(training, class_type='multiclass')
 
     # scale the data for use with PCA
     scaler = StandardScaler()
@@ -53,7 +53,7 @@ def main():
     # Binary No-PCA
 
     # use training data for prediction
-    x_train, y_train = util.get_input_output_pca_regular(training, class_type='binary')
+    x_train, y_train = util.get_input_output(training, class_type='binary')
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=False, class_type='binary')
@@ -61,7 +61,7 @@ def main():
     # Multiclass No-PCA
 
     # use training data for prediction
-    x_train, y_train = util.get_input_output_pca_regular(training, class_type='multiclass')
+    x_train, y_train = util.get_input_output(training, class_type='multiclass')
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=False, class_type='multiclass')
