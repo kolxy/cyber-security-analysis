@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import datetime as dt
+import category_encoders as ce
+from sklearn.preprocessing import LabelEncoder
 
 from constants import DataDir
 from joblib import dump, load
@@ -161,14 +163,11 @@ def category_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
     for c in df.columns[df.dtypes == 'category']:
         df[c] = df[c].cat.codes
 
-    df['stime'] = df['stime'].map(dt.datetime.toordinal)
-    df['ltime'] = df['ltime'].map(dt.datetime.toordinal)
-
     return df
 
 
 def get_input_output(df: pd.DataFrame,
-                     class_type='binary') -> Tuple[pd.DataFrame, pd.DataFrame]:
+                     class_type: str = 'binary') -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Gets the input and the output (eit
 
@@ -182,10 +181,12 @@ def get_input_output(df: pd.DataFrame,
         output_data = df['label']
     elif class_type == 'multiclass':
         output_data = df['attack_cat']
+        output_data = LabelEncoder().fit_transform(output_data)
     else:
         raise ValueError(f'Invalid class type: {class_type}. Use either binary or multiclass')
 
-    # fix types
+    encoder = ce.BinaryEncoder(return_df=True)
+    input_data = encoder.fit_transform(input_data)
     input_data = input_data.astype(np.single)
 
     return input_data, output_data
@@ -212,6 +213,7 @@ def reduce_features(input_data: pd.DataFrame,
         dump(clf, f'output/{output_data_type}_rf_classifier.joblib')
 
     return clf, SelectFromModel(clf, prefit=True).transform(input_data)
+
 
 def convert_input_column_type(df: pd.DataFrame):
     """

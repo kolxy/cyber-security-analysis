@@ -13,7 +13,7 @@ jan_df = df[(df['stime'] < '2015-01-24') & (df['stime'] > '2015-01-20')]
 hosts_dos_attacked = jan_df[jan_df['attack_cat'] == 'DoS']['dstip'].unique()
 connection_frequencies_january = get_host_connection_frequency(jan_df, hosts_dos_attacked[0])
 
-profile_by_minutes = 20
+profile_by_minutes = 5
 profile = mp.compute(connection_frequencies_january['connection_frequency'].values, profile_by_minutes, n_jobs=-1)
 profile = mp.discover.discords(profile)
 
@@ -25,6 +25,7 @@ mp_adjusted = np.append(profile['mp'], np.zeros(profile['w'] - 1) + np.nan)
 fig, axes = plt.subplots(2, 1, sharex=True, figsize=(20,7))
 axes[0].plot(np.arange(len(profile['data']['ts'])), profile['data']['ts'])
 axes[0].set_title(f'Connections to {hosts_dos_attacked[0]} per minute on {january_day}', size=22)
+
 
 #Plot the Matrix Profile
 axes[1].plot(np.arange(len(mp_adjusted)), mp_adjusted)
@@ -46,7 +47,7 @@ feb_df = df[(df['stime'] < '2015-02-20') & (df['stime'] > '2015-02-17')]
 hosts_dos_attacked = feb_df[feb_df['attack_cat'] == 'DoS']['dstip'].unique()
 connection_frequencies_february = get_host_connection_frequency(feb_df, hosts_dos_attacked[0])
 
-profile_by_minutes = 20
+profile_by_minutes = 5
 profile = mp.compute(connection_frequencies_february['connection_frequency'].values, profile_by_minutes, n_jobs=-1)
 profile = mp.discover.discords(profile)
 
@@ -58,6 +59,7 @@ mp_adjusted = np.append(profile['mp'], np.zeros(profile['w'] - 1) + np.nan)
 fig, axes = plt.subplots(2, 1, sharex=True, figsize=(20,7))
 axes[0].plot(np.arange(len(profile['data']['ts'])), profile['data']['ts'])
 axes[0].set_title(f'Connections to {hosts_dos_attacked[0]} per minute on {february_day}', size=22)
+
 
 #Plot the Matrix Profile
 axes[1].plot(np.arange(len(mp_adjusted)), mp_adjusted)

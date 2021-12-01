@@ -1,44 +1,52 @@
-import pandas as pd
+import category_encoders as ce
+import numpy as np
 import util
 
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from constants import DataDir
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_validate, KFold
+from sklearn.model_selection import train_test_split
 
 
-def run_random_forest_classification(input_data: pd.DataFrame,
-                                     output_data: pd.DataFrame,
+def run_random_forest_classification(x_train: np.ndarray,
+                                     y_train: np.ndarray,
+                                     x_test: np.ndarray,
+                                     y_test: np.ndarray,
                                      class_type: str) -> None:
-    """
-    Runs random forest classification on the given input and output data.
-
-    :param input_data: An input as a pandas dataframe.
-    :param output_data: The output labels as a pandas dataframe.
-    :param class_type: The type of class. (binary, multiclass)
-    :return: Nothing, a "pure" IO operation.
-    """
-    scoring = ['f1_weighted', 'accuracy']
-    rf_clf = RandomForestClassifier(max_depth=None, n_estimators=150)
-    cv = KFold(n_splits=5, random_state=42, shuffle=True)
-    scores = cross_validate(rf_clf, input_data, output_data, scoring=scoring, cv=cv, n_jobs=-1)
-    accuracy = scores['test_accuracy']
-    f1_weighted = scores['test_f1_weighted']
-
-    print(f'Random Forest over {class_type} classes '
-          f'- Accuracy score (mean): {accuracy.mean() * 100:.5f}%, '
-          f'F1 Score (Weighted) (mean): {f1_weighted.mean():.5f}')
+    rf_clf = RandomForestClassifier(max_depth=None,
+                                    n_estimators=150,
+                                    n_jobs=-1)
+    print("Fitting")
+    rf_clf.fit(x_train, y_train)
+    print("Predicting")
+    score = rf_clf.score(x_test, y_test)
+    print(f"Accuracy - {class_type}: {score}")
 
 
 if __name__ == '__main__':
-    df = util.get_clean_dataframe_from_file(DataDir.all_tables)
-    df = util.category_to_numeric(df)
+    print("Reading data")
+    training = util.get_clean_dataframe_from_file(DataDir.all_tables)
+    training = util.convert_input_column_type(training)
 
-    # does random forest classification on binary data
-    x, y = util.get_input_output(df, class_type='binary')
-    _, reduced_features = util.reduce_features(x, y, output_data_type='binary')
-    run_random_forest_classification(reduced_features, y, class_type='binary')
+    # use training data for prediction
+    x_train, y_train = util.get_input_output(training, class_type='multiclass')
 
-    # does random forest classification on multiclass data
-    x, y = util.get_input_output(df, class_type='multiclass')
-    _, reduced_features = util.reduce_features(x, y, output_data_type='multiclass')
-    run_random_forest_classification(reduced_features, y, class_type='multiclass')
+    # fix types
+    # binary encode string features
+    encoder = ce.BinaryEncoder(return_df=True)
+    x_train = encoder.fit_transform(x_train)
+    y_train = LabelEncoder().fit_transform(y_train)
+
+    # scale the data for use with PCA
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_train)
+
+    # apply principal components analysis
+    pca = PCA(0.99)
+    x_train = pca.fit_transform(x_train)
+
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+
+    run_random_forest_classification(x_train, y_train, x_test, y_test, class_type='multiclass')
+
