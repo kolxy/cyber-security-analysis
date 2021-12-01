@@ -12,6 +12,18 @@ def parse_integers(x: str) -> int:
         return np.int(x, 16) if '0x' in x else np.NaN
 
 
+# handles the attack category parsing
+def parse_attack_cat(x: str) -> str:
+    if x == '':
+        return 'benign'
+
+    # a weird case in their labeling
+    if x.lower().strip() == 'backdoor':
+        return 'backdoors'
+
+    return x.lower().strip()
+
+
 # data file directory (stored as an immutable dataclass)
 @dataclass(frozen=True)
 class DataDir:
@@ -76,6 +88,6 @@ class DataDir:
         'ct_src_dport_ltm': parse_integers,
         'ct_dst_sport_ltm': parse_integers,
         'ct_dst_src_ltm': parse_integers,
-        'attack_cat': lambda x: 'Benign' if x == '' else str(x),
+        'attack_cat': parse_attack_cat,
         'label': parse_integers
     }

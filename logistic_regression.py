@@ -18,6 +18,8 @@ def main():
     training = util.get_clean_dataframe_from_file(DataDir.all_tables)
     training = util.convert_input_column_type(training)
 
+    print(training['attack_cat'].value_counts())
+
     # Binary PCA
 
     # use training data for prediction
