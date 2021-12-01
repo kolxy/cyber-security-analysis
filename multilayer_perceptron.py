@@ -1,11 +1,10 @@
 import os
 
 import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
-from prince import FAMD
 from sklearn.decomposition import PCA
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score, f1_score, precision_score, \
+    recall_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 
@@ -22,6 +21,7 @@ def run_mlp_classification(x_train: np.ndarray,
                            x_test: np.ndarray,
                            y_test: np.ndarray,
                            reduced: bool,
+                           contains_benign: bool,
                            class_type: str = 'binary') -> None:
     """
     Runs a multilayer perceptron on the given input and output data.
@@ -46,12 +46,35 @@ def run_mlp_classification(x_train: np.ndarray,
     cm = confusion_matrix(y_test, predict)
     display_cm = ConfusionMatrixDisplay(confusion_matrix=cm)
     display_cm.plot()
-    if reduced:
-        plt.savefig(PATH_OUTPUT + f'mlp_pca_{class_type}_confusion_matrix.png')
+    if class_type == 'binary':
+        if reduced:
+            plt.title(f'MLP PCA {class_type} Confusion Matrix')
+            plt.savefig(PATH_OUTPUT + f'mlp_pca_{class_type}_confusion_matrix.png')
+        else:
+            plt.title(f'MLP no PCA {class_type} Confusion Matrix')
+            plt.savefig(PATH_OUTPUT + f'mlp_no_pca_{class_type}_confusion_matrix.png')
     else:
-        plt.savefig(PATH_OUTPUT + f'mlp_no_pca_{class_type}_confusion_matrix.png')
+        if contains_benign:
+            if reduced:
+                plt.title(f'MLP PCA {class_type} Confusion Matrix')
+                plt.savefig(PATH_OUTPUT + f'mlp_pca_{class_type}_confusion_matrix.png')
+            else:
+                plt.title(f'MLP no PCA {class_type} Confusion Matrix')
+                plt.savefig(PATH_OUTPUT + f'mlp_no_pca_{class_type}_confusion_matrix.png')
+        else:
+            if reduced:
+                plt.title(f'MLP PCA {class_type} Confusion Matrix - No Benign')
+                plt.savefig(PATH_OUTPUT + f'mlp_pca_{class_type}_confusion_matrix_no_benign.png')
+            else:
+                plt.title(f'MLP no PCA {class_type} Confusion Matrix - No Benign')
+                plt.savefig(PATH_OUTPUT + f'mlp_no_pca_{class_type}_confusion_matrix_no_benign.png')
+
+    plt.close()
 
     print(f"Accuracy - {class_type}: {accuracy_score(y_test, predict)}")
+    print(f"F1 Score - {class_type}: {f1_score(y_test, predict, average='micro')}")
+    print(f"Precision - {class_type}: {precision_score(y_test, predict, average='micro')}")
+    print(f"Recall - {class_type}: {recall_score(y_test, predict, average='micro')}")
 
 
 if __name__ == '__main__':
@@ -74,7 +97,7 @@ if __name__ == '__main__':
     x_train = pca.fit_transform(x_train)
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
-    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, class_type='binary')
+    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True, class_type='binary')
 
     # Multiclass PCA
 
@@ -90,7 +113,23 @@ if __name__ == '__main__':
     x_train = pca.fit_transform(x_train)
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
-    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, class_type='multiclass')
+    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True, class_type='multiclass')
+
+    # Multiclass PCA
+
+    # use training data for prediction
+    x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
+
+    # scale the data for use with PCA
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_train)
+
+    # apply principal components analysis
+    pca = PCA(0.99)
+    x_train = pca.fit_transform(x_train)
+
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=False, class_type='multiclass')
 
     # Binary No-PCA
 
@@ -98,7 +137,7 @@ if __name__ == '__main__':
     x_train, y_train = util.get_input_output(training, class_type='binary')
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
-    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, class_type='binary')
+    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, contains_benign=True, class_type='binary')
 
     # Multiclass No-PCA
 
@@ -106,6 +145,12 @@ if __name__ == '__main__':
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
-    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, class_type='multiclass')
+    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, contains_benign=True, class_type='multiclass')
+
+    # use training data for prediction
+    x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
+
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, contains_benign=False, class_type='multiclass')
 
 

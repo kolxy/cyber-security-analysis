@@ -167,7 +167,8 @@ def category_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_input_output(df: pd.DataFrame,
-                     class_type: str = 'binary') -> Tuple[pd.DataFrame, pd.DataFrame]:
+                     class_type: str = 'binary',
+                     benign_include: bool = True) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Gets the input and the output (eit
 
@@ -175,6 +176,9 @@ def get_input_output(df: pd.DataFrame,
     :param class_type: The type of classifier we are making (binary|multiclass).
     :return: The input and output data for use with sklearn models.
     """
+    if not benign_include:
+        df = df[df['attack_cat'] != 'benign']
+
     input_data = df.drop(['attack_cat', 'label'], axis=1)
 
     if class_type == 'binary':
