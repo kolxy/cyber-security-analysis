@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 import util
 
 from constants import DataDir
-from sklearn.model_selection import cross_validate, KFold, train_test_split
+from sklearn.model_selection import train_test_split
 
 
 def run_mlp_classification(x_train: np.ndarray,
@@ -34,7 +34,7 @@ def run_mlp_classification(x_train: np.ndarray,
     mlp_clf.fit(x_train, y_train)
     print("Predicting")
     score = mlp_clf.score(x_test, y_test)
-    print(f"Accuracy - {class_type}: {score}")
+    print(f"Multilayer Perceptron accuracy - {class_type}: {score}")
 
 
 if __name__ == '__main__':

@@ -1,13 +1,10 @@
 import util
 from constants import DataDir
-import matplotlib.pyplot as plt
 import os
-import numpy as np
-import category_encoders as ce
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 
 PATH_OUTPUT = os.getcwd() + "/output/"
 
@@ -29,13 +26,7 @@ def main():
     x_train = pca.fit_transform(x_train)
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
-
     run_logistic_regression(x_train, y_train, x_test, y_test, class_type='binary')
-
-    # # does logistic regression on multiclass data
-    # x, y = util.get_input_output(df, class_type='multiclass')
-    # _, reduced_features = util.reduce_features(x, y, output_data_type='multiclass')
-    # run_logistic_regression(reduced_features, y, class_type='multiclass')
 
 
 def run_logistic_regression(x_train,
