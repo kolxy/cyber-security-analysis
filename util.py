@@ -118,8 +118,8 @@ def get_clean_dataframe_from_file(filename: str,
 
 
 def get_mp_dataframe_from_file(filename: str,
-                                       method='h5',
-                                       key='df') -> pd.DataFrame:
+                               method='h5',
+                               key='df') -> pd.DataFrame:
     """
     Returns a clean dataframe using a specific method. Supports reading from
     CSV as well as .h5 file.
@@ -166,8 +166,34 @@ def category_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def get_input_output(df: pd.DataFrame,
-                     class_type: str = 'binary') -> Tuple[pd.DataFrame, pd.DataFrame]:
+def get_input_output_famd(df: pd.DataFrame,
+                          class_type: str = 'binary') -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Gets the input and the output (eit
+
+    :param df: An input dataframe that has all numeric types.
+    :param class_type: The type of classifier we are making (binary|multiclass).
+    :return: The input and output data for use with sklearn models.
+    """
+    input_data = df.drop(['attack_cat', 'label'], axis=1)
+
+    if class_type == 'binary':
+        output_data = df['label']
+    elif class_type == 'multiclass':
+        output_data = df['attack_cat']
+        # output_data = LabelEncoder().fit_transform(output_data)
+    else:
+        raise ValueError(f'Invalid class type: {class_type}. Use either binary or multiclass')
+    #
+    # encoder = ce.BinaryEncoder(return_df=True)
+    # input_data = encoder.fit_transform(input_data)
+    # input_data = input_data.astype(np.single)
+
+    return input_data, output_data
+
+
+def get_input_output_pca_regular(df: pd.DataFrame,
+                                 class_type: str = 'binary') -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Gets the input and the output (eit
 
@@ -190,6 +216,7 @@ def get_input_output(df: pd.DataFrame,
     input_data = input_data.astype(np.single)
 
     return input_data, output_data
+
 
 
 def reduce_features(input_data: pd.DataFrame,

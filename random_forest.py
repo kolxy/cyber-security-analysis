@@ -46,6 +46,8 @@ if __name__ == '__main__':
     pca = PCA(0.99)
     x_train = pca.fit_transform(x_train)
 
+    print(pca.n_components_)
+
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
 
     run_random_forest_classification(x_train, y_train, x_test, y_test, class_type='multiclass')
