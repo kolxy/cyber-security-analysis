@@ -102,7 +102,7 @@ def run_logistic_regression(x_train,
                             reduced=False):
     clf = LogisticRegression(multi_class='multinomial',
                              solver='saga',
-                             max_iter=1000,
+                             max_iter=1500,
                              n_jobs=-1,
                              random_state=42)
     print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
@@ -155,6 +155,7 @@ def run_logistic_regression(x_train,
         top_values = [x[1] for x in top]
 
         # output graph
+        plt.close()
         plt.barh(top_names, top_values)
         plt.gca().invert_yaxis()
 
@@ -176,6 +177,8 @@ def run_logistic_regression(x_train,
             plt.savefig(PATH_OUTPUT + f"Logistic Regression feature importance - no benign - {class_type}.png")
             print("Output: ")
             print(PATH_OUTPUT + f"Logistic Regression feature importance - no benign - {class_type}.png")
+
+        plt.close()
 
         return top
 
