@@ -20,6 +20,7 @@ def main():
     training = util.convert_input_column_type(training)
 
     print(training['attack_cat'].value_counts())
+    print(dict(zip(training['attack_cat'].cat.codes, training['attack_cat'])))
 
     # Binary PCA
 
@@ -31,10 +32,10 @@ def main():
     x_train = scaler.fit_transform(x_train)
 
     # apply principal components analysis
-    pca = PCA(0.99)
+    pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=True, class_type='binary')
 
     # Multiclass PCA
@@ -47,10 +48,10 @@ def main():
     x_train = scaler.fit_transform(x_train)
 
     # apply principal components analysis
-    pca = PCA(0.99)
+    pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=True, class_type='multiclass')
 
     # use training data for prediction
@@ -61,10 +62,10 @@ def main():
     x_train = scaler.fit_transform(x_train)
 
     # apply principal components analysis
-    pca = PCA(0.99)
+    pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=True, contains_benign=False, class_type='multiclass')
 
     # Binary No-PCA
@@ -72,7 +73,7 @@ def main():
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='binary')
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=False, class_type='binary')
 
     # Multiclass No-PCA
@@ -80,7 +81,7 @@ def main():
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=False, class_type='multiclass')
 
     # Multiclass No-PCA
@@ -88,7 +89,7 @@ def main():
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=False, contains_benign=False, class_type='multiclass')
 
 
@@ -102,10 +103,11 @@ def run_logistic_regression(x_train,
     clf = LogisticRegression(multi_class='multinomial',
                              solver='saga',
                              max_iter=1000,
-                             n_jobs=-1)
-    print(f"Fitting - reduced? {reduced} - class type? {class_type}")
+                             n_jobs=-1,
+                             random_state=42)
+    print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
     clf.fit(x_train, y_train)
-    print(f"Predicting - reduced? {reduced} - class type? {class_type}")
+    print(f"Predicting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
     predict = clf.predict(x_test)
     print("Generating confusion matrix")
     cm = confusion_matrix(y_test, predict)

@@ -37,10 +37,11 @@ def run_mlp_classification(x_train: np.ndarray,
                         activation='relu',
                         solver='adam',
                         learning_rate_init=1e-3,
-                        early_stopping=True)
-    print(f"Fitting - reduced? {reduced} - class type? {class_type}")
+                        early_stopping=True,
+                        random_state=42)
+    print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
     clf.fit(x_train, y_train)
-    print(f"Predicting - reduced? {reduced} - class type? {class_type}")
+    print(f"Predicting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
     predict = clf.predict(x_test)
     print("Generating confusion matrix")
     cm = confusion_matrix(y_test, predict)
@@ -93,10 +94,10 @@ if __name__ == '__main__':
     x_train = scaler.fit_transform(x_train)
 
     # apply principal components analysis
-    pca = PCA(0.99)
+    pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True, class_type='binary')
 
     # Multiclass PCA
@@ -109,10 +110,10 @@ if __name__ == '__main__':
     x_train = scaler.fit_transform(x_train)
 
     # apply principal components analysis
-    pca = PCA(0.99)
+    pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True, class_type='multiclass')
 
     # Multiclass PCA
@@ -125,10 +126,10 @@ if __name__ == '__main__':
     x_train = scaler.fit_transform(x_train)
 
     # apply principal components analysis
-    pca = PCA(0.99)
+    pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=False, class_type='multiclass')
 
     # Binary No-PCA
@@ -136,7 +137,7 @@ if __name__ == '__main__':
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='binary')
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, contains_benign=True, class_type='binary')
 
     # Multiclass No-PCA
@@ -144,13 +145,13 @@ if __name__ == '__main__':
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, contains_benign=True, class_type='multiclass')
 
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25)
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_mlp_classification(x_train, y_train, x_test, y_test, reduced=False, contains_benign=False, class_type='multiclass')
 
 
