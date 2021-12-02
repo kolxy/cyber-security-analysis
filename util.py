@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import datetime as dt
-import category_encoders as ce
 from sklearn.preprocessing import LabelEncoder
 
 from constants import DataDir
