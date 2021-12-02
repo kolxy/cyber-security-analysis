@@ -9,3 +9,4 @@ shap ~= 0.40.0
 joblib ~= 1.1.0
 scipy~=1.7.2
 matrixprofile~=1.1.10
+category_encoders
