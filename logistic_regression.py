@@ -92,6 +92,15 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=False, contains_benign=False, class_type='multiclass')
 
+    # Multiclass Feature Selection
+
+    x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
+    x_train = x_train[['stcpb', 'dtcpb', 'sload']]
+
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
+
+    run_logistic_regression(x_train, y_train, x_test, y_test, reduced=False, contains_benign=False, class_type='multiclass')
+
 
 def run_logistic_regression(x_train,
                             y_train,
