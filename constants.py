@@ -1,5 +1,6 @@
 import datetime
 import numpy as np
+import sys
 
 from dataclasses import dataclass
 
@@ -79,3 +80,64 @@ class DataDir:
         'attack_cat': lambda x: 'Benign' if x == '' else str(x),
         'label': parse_integers
     }
+
+def enable_tf_debug(eager: object = True, debugMode: object = True) -> object:
+    import tensorflow as tf
+    tf.config.run_functions_eagerly(eager)
+    if debugMode: tf.data.experimental.enable_debug_mode()
+
+def tf_np_behavior():
+    import tensorflow.python.ops.numpy_ops.np_config as np_config
+    np_config.enable_numpy_behavior()
+
+class x_y:
+    def __init__(self, x=None, y=None):
+        self.x = x
+        self.y = y
+
+    def transform(self, function, *args, **kwargs):
+        if self.x is not None:
+            self.x = function(self.x, *args, **kwargs)
+        if self.y is not None:
+            self.y = function(self.y, *args, **kwargs)
+
+class ml_data:
+    def __init__(self, train=None, test=None, validate=None):
+        self.train = train
+        self.test = test
+        self.validate = validate
+
+    def apply(self, function, *args, **kwargs):
+        returns = ml_data()
+        if self.train is not None:
+            returns.train = function(self.train, *args, **kwargs)
+        if self.test is not None:
+            returns.test = function(self.test, *args, **kwargs)
+        if self.validate is not None:
+            returns.validate = function(self.validate, *args, **kwargs)
+        return returns
+
+    def transform(self, function, *args, **kwargs):
+        if self.train is not None:
+            self.train = function(self.train, *args, **kwargs)
+        if self.test is not None:
+            self.test = function(self.test, *args, **kwargs)
+        if self.validate is not None:
+            self.validate = function(self.validate, *args, **kwargs)
+
+def get_debug_flag():
+    return sys.gettrace() is not None
+
+DEBUG = get_debug_flag()
+
+#if cuda is working with tensorflow, this sets gpu0 to NOT be visible
+def disable_gpu():
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+#if cuda is working with tensorflow, this sets gpu0 to be visible
+def enable_gpu():
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
