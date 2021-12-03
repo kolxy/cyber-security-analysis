@@ -75,33 +75,33 @@ if __name__ == '__main__':
     print("Reading data")
     training = util.get_clean_dataframe_from_file(DataDir.all_tables)
     training = util.convert_input_column_type(training)
-    #
-    # print(training['attack_cat'].value_counts())
-    # print(training['attack_cat'].cat.codes)
-    # print(training['attack_cat'].cat.categories)
-    # print(dict(zip(training['attack_cat'].cat.codes, training['attack_cat'])))
-    #
-    # # Binary PCA
-    #
-    # # use training data for prediction
-    # x_train, y_train = util.get_input_output(training, class_type='binary')
-    # start_time = default_timer()
-    #
-    # # scale the data for use with PCA
-    # scaler = StandardScaler()
-    # x_train = scaler.fit_transform(x_train)
-    #
-    # # apply principal components analysis
-    # pca = PCA(0.99, random_state=42)
-    # x_train = pca.fit_transform(x_train)
-    #
-    # end_time = default_timer()
-    #
-    # print(f'Total time to run PCA (with scaling): {end_time - start_time} seconds')
 
-    # x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    # run_random_forest_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True,
-    #                                  class_type='binary')
+    print(training['attack_cat'].value_counts())
+    print(training['attack_cat'].cat.codes)
+    print(training['attack_cat'].cat.categories)
+    print(dict(zip(training['attack_cat'].cat.codes, training['attack_cat'])))
+
+    # Binary PCA
+
+    # use training data for prediction
+    x_train, y_train = util.get_input_output(training, class_type='binary')
+    start_time = default_timer()
+
+    # scale the data for use with PCA
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_train)
+
+    # apply principal components analysis
+    pca = PCA(0.99, random_state=42)
+    x_train = pca.fit_transform(x_train)
+
+    end_time = default_timer()
+
+    print(f'Total time to run PCA (with scaling): {end_time - start_time} seconds')
+
+    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
+    run_random_forest_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True,
+                                     class_type='binary')
 
     # Multiclass PCA
 
