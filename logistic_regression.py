@@ -1,9 +1,12 @@
+from timeit import default_timer
+
 import numpy as np
 from matplotlib import pyplot as plt
 
 import util
 from constants import DataDir
 import os
+import prince
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
@@ -27,6 +30,10 @@ def main():
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='binary')
 
+    print(f'Shape of x_train: {x_train.shape}, Shape of y_train {y_train.shape}')
+
+    start_time = default_timer()
+
     # scale the data for use with PCA
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
@@ -34,6 +41,12 @@ def main():
     # apply principal components analysis
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
+
+    end_time = default_timer()
+
+    print(f'Total time to run PCA (with scaling): {end_time - start_time} seconds')
+
+    print(f'Number of PCA components: {pca.n_components_}')
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, reduced=True, class_type='binary')
@@ -108,42 +121,48 @@ def run_logistic_regression(x_train,
                             y_test,
                             class_type='binary',
                             contains_benign=True,
+                            reduction_type='PCA',
                             reduced=False):
     clf = LogisticRegression(multi_class='multinomial',
                              solver='saga',
                              max_iter=1500,
                              n_jobs=-1,
                              random_state=42)
-    print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
+    start_time = default_timer()
     clf.fit(x_train, y_train)
+    end_time = default_timer()
+    print(f'Total time to fit: {end_time - start_time} seconds')
     print(f"Predicting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
+    start_time = default_timer()
     predict = clf.predict(x_test)
+    end_time = default_timer()
     print("Generating confusion matrix")
+    print(f'Total time to predict: {end_time - start_time} seconds')
     cm = confusion_matrix(y_test, predict)
     display_cm = ConfusionMatrixDisplay(confusion_matrix=cm)
     display_cm.plot()
     if class_type == 'binary':
         if reduced:
-            plt.title(f'Logistic Regression PCA {class_type} Confusion Matrix')
-            plt.savefig(PATH_OUTPUT + f'random_forest_pca_{class_type}_confusion_matrix.png')
+            plt.title(f'Logistic Regression {reduction_type} {class_type} Confusion Matrix')
+            plt.savefig(PATH_OUTPUT + f'random_forest_{reduction_type}_{class_type}_confusion_matrix.png')
         else:
-            plt.title(f'Logistic Regression no PCA {class_type} Confusion Matrix')
-            plt.savefig(PATH_OUTPUT + f'random_forest_no_pca_{class_type}_confusion_matrix.png')
+            plt.title(f'Logistic Regression no PCA or FAMD {class_type} Confusion Matrix')
+            plt.savefig(PATH_OUTPUT + f'random_forest_no_pca_or_famd_{class_type}_confusion_matrix.png')
     else:
         if contains_benign:
             if reduced:
-                plt.title(f'Logistic Regression PCA {class_type} Confusion Matrix')
-                plt.savefig(PATH_OUTPUT + f'random_forest_pca_{class_type}_confusion_matrix.png')
+                plt.title(f'Logistic Regression {reduction_type} {class_type} Confusion Matrix')
+                plt.savefig(PATH_OUTPUT + f'random_forest_{reduction_type}_{class_type}_confusion_matrix.png')
             else:
-                plt.title(f'Logistic Regression no PCA {class_type} Confusion Matrix')
-                plt.savefig(PATH_OUTPUT + f'random_forest_no_pca_{class_type}_confusion_matrix.png')
+                plt.title(f'Logistic Regression no PCA or FAMD {class_type} Confusion Matrix')
+                plt.savefig(PATH_OUTPUT + f'random_forest_no_pca_or_famd_{class_type}_confusion_matrix.png')
         else:
             if reduced:
-                plt.title(f'Logistic Regression PCA {class_type} Confusion Matrix - No Benign')
+                plt.title(f'Logistic Regression {reduction_type} {class_type} Confusion Matrix - No Benign')
                 plt.savefig(PATH_OUTPUT + f'random_forest_pca_{class_type}_confusion_matrix_no_benign.png')
             else:
-                plt.title(f'Logistic Regression no PCA {class_type} Confusion Matrix - No Benign')
-                plt.savefig(PATH_OUTPUT + f'logistic_regression_no_pca_{class_type}_confusion_matrix_no_benign.png')
+                plt.title(f'Logistic Regression no PCA or FAMD {class_type} Confusion Matrix - No Benign')
+                plt.savefig(PATH_OUTPUT + f'logistic_regression_no_pca_or_famd_{class_type}_confusion_matrix_no_benign.png')
 
     plt.close()
     print(f"Accuracy - {class_type}: {accuracy_score(y_test, predict)}")

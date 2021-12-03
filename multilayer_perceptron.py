@@ -1,4 +1,5 @@
 import os
+from timeit import default_timer
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -39,11 +40,16 @@ def run_mlp_classification(x_train: np.ndarray,
                         learning_rate_init=1e-3,
                         early_stopping=True,
                         random_state=42)
-    print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
+    start_time = default_timer()
     clf.fit(x_train, y_train)
+    end_time = default_timer()
+    print(f'Total time to fit: {end_time - start_time} seconds')
     print(f"Predicting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
+    start_time = default_timer()
     predict = clf.predict(x_test)
+    end_time = default_timer()
     print("Generating confusion matrix")
+    print(f'Total time to predict: {end_time - start_time} seconds')
     cm = confusion_matrix(y_test, predict)
     display_cm = ConfusionMatrixDisplay(confusion_matrix=cm)
     display_cm.plot()
@@ -89,6 +95,8 @@ if __name__ == '__main__':
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='binary')
 
+    start_time = default_timer()
+
     # scale the data for use with PCA
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
@@ -96,6 +104,10 @@ if __name__ == '__main__':
     # apply principal components analysis
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
+
+    end_time = default_timer()
+
+    print(f'Total time to run PCA (with scaling): {end_time - start_time} seconds')
 
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_mlp_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True, class_type='binary')
