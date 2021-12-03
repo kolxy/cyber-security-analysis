@@ -137,10 +137,10 @@ class ml_data:
         if self.validate is not None:
             self.validate = function(self.validate, *args, **kwargs)
 
-def get_debug_flag():
+def _get_debug_flag():
     return sys.gettrace() is not None
 
-DEBUG = get_debug_flag()
+DEBUG = _get_debug_flag()
 
 #if cuda is working with tensorflow, this sets gpu0 to NOT be visible
 def disable_gpu():

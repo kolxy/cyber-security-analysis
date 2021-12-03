@@ -83,7 +83,7 @@ def conv_block(
 def get_ae(nInputs, nLatent):
     model = l.InputLayer(input_shape=(NTIMESTEPS))
 
-    pass
+    return
 
 if __name__ == "__main__":
     get_data()
