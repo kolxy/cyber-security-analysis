@@ -110,8 +110,9 @@ def get_clean_dataframe_from_file(filename: str,
     else:
         raise ValueError(f'Invalid method: {method}. Use either csv or h5')
 
+    # the columns with a lot of NaN values
+    df = df.drop(['ct_ftp_cmd', 'ct_flw_http_mthd'], axis=1)
     df = df.dropna()
-    df = df.drop_duplicates()
     df = df.sort_values('stime')
 
     return df
@@ -196,6 +197,32 @@ def get_input_output(df: pd.DataFrame,
     return input_data, output_data
 
 
+def get_input_output_famd(df: pd.DataFrame,
+                          class_type: str = 'binary',
+                          benign_include: bool = True) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Gets the input and the output (for FAMD)
+
+    :param benign_include: Includes benign data?
+    :param df: An input dataframe that has all numeric types.
+    :param class_type: The type of classifier we are making (binary|multiclass).
+    :return: The input and output data for use with sklearn models.
+    """
+    if not benign_include:
+        df = df[df['attack_cat'] != 'benign']
+
+    input_data = df.drop(['attack_cat', 'label'], axis=1)
+
+    if class_type == 'binary':
+        output_data = df['label']
+    elif class_type == 'multiclass':
+        output_data = df['attack_cat']
+        output_data = LabelEncoder().fit_transform(output_data)
+    else:
+        raise ValueError(f'Invalid class type: {class_type}. Use either binary or multiclass')
+
+    return input_data, output_data
+
 
 def reduce_features(input_data: pd.DataFrame,
                     output_data: pd.DataFrame,
@@ -227,12 +254,8 @@ def convert_input_column_type(df: pd.DataFrame):
 
     IMPORTANT: srcip and dstip should be dropped separately
     """
-
-    # pivot wider for string features
-    result = pd.get_dummies(df, columns=["proto", "state", "service"])
-
     # convert time to timestamp
-    if 'stime' in result.columns:
-        result['stime'] = result.stime.values.astype(int) // 10**9
-        result['ltime'] = result.ltime.values.astype(int) // 10**9
-    return result
+    if 'stime' in df.columns:
+        df['stime'] = df.stime.values.astype(int) // 10**9
+        df['ltime'] = df.ltime.values.astype(int) // 10**9
+    return df

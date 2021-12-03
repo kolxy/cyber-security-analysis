@@ -1,4 +1,5 @@
 import os
+from timeit import default_timer
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -26,11 +27,16 @@ def run_random_forest_classification(x_train: np.ndarray,
                                  n_estimators=150,
                                  random_state=42,
                                  n_jobs=-1)
-    print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
+    start_time = default_timer()
     clf.fit(x_train, y_train)
+    end_time = default_timer()
+    print(f'Total time to fit: {end_time - start_time} seconds')
     print(f"Predicting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
+    start_time = default_timer()
     predict = clf.predict(x_test)
+    end_time = default_timer()
     print("Generating confusion matrix")
+    print(f'Total time to predict: {end_time - start_time} seconds')
     cm = confusion_matrix(y_test, predict)
     display_cm = ConfusionMatrixDisplay(confusion_matrix=cm)
     display_cm.plot()
