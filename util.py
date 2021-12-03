@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import datetime as dt
 import category_encoders as ce
 from sklearn.preprocessing import LabelEncoder
 
@@ -110,8 +109,8 @@ def get_clean_dataframe_from_file(filename: str,
     else:
         raise ValueError(f'Invalid method: {method}. Use either csv or h5')
 
-    # the columns with a lot of NaN values
-    df = df.drop(['ct_ftp_cmd', 'ct_flw_http_mthd'], axis=1)
+    # the columns with a lot of NaN values, and values like IP and port
+    df = df.drop(['ct_ftp_cmd', 'ct_flw_http_mthd', 'srcip', 'sport', 'dstip', 'dsport'], axis=1)
     df = df.dropna()
     df = df.sort_values('stime')
 

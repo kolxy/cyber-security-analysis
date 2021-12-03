@@ -22,39 +22,41 @@ def main():
     training = util.get_clean_dataframe_from_file(DataDir.all_tables)
     training = util.convert_input_column_type(training)
 
-    print(training['attack_cat'].value_counts())
-    print(dict(zip(training['attack_cat'].cat.codes, training['attack_cat'])))
-
-    # Binary PCA
-
-    # use training data for prediction
-    x_train, y_train = util.get_input_output(training, class_type='binary')
-
-    print(f'Shape of x_train: {x_train.shape}, Shape of y_train {y_train.shape}')
-
-    start_time = default_timer()
-
-    # scale the data for use with PCA
-    scaler = StandardScaler()
-    x_train = scaler.fit_transform(x_train)
-
-    # apply principal components analysis
-    pca = PCA(0.99, random_state=42)
-    x_train = pca.fit_transform(x_train)
-
-    end_time = default_timer()
-
-    print(f'Total time to run PCA (with scaling): {end_time - start_time} seconds')
-
-    print(f'Number of PCA components: {pca.n_components_}')
-
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_logistic_regression(x_train, y_train, x_test, y_test, reduced=True, class_type='binary')
+    # print(training['attack_cat'].value_counts())
+    # print(dict(zip(training['attack_cat'].cat.codes, training['attack_cat'])))
+    #
+    # # Binary PCA
+    #
+    # # use training data for prediction
+    # x_train, y_train = util.get_input_output(training, class_type='binary')
+    #
+    # print(f'Shape of x_train: {x_train.shape}, Shape of y_train {y_train.shape}')
+    #
+    # start_time = default_timer()
+    #
+    # # scale the data for use with PCA
+    # scaler = StandardScaler()
+    # x_train = scaler.fit_transform(x_train)
+    #
+    # # apply principal components analysis
+    # pca = PCA(0.99, random_state=42)
+    # x_train = pca.fit_transform(x_train)
+    #
+    # end_time = default_timer()
+    #
+    # print(f'Total time to run PCA (with scaling): {end_time - start_time} seconds')
+    #
+    # print(f'Number of PCA components: {pca.n_components_}')
+    #
+    # x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
+    # run_logistic_regression(x_train, y_train, x_test, y_test, reduced=True, class_type='binary')
 
     # Multiclass PCA
 
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
+
+    print(y_train)
 
     # scale the data for use with PCA
     scaler = StandardScaler()
@@ -128,6 +130,7 @@ def run_logistic_regression(x_train,
                              max_iter=1500,
                              n_jobs=-1,
                              random_state=42)
+    print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
     start_time = default_timer()
     clf.fit(x_train, y_train)
     end_time = default_timer()

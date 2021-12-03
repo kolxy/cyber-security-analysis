@@ -27,6 +27,7 @@ def run_random_forest_classification(x_train: np.ndarray,
                                  n_estimators=150,
                                  random_state=42,
                                  n_jobs=-1)
+    print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
     start_time = default_timer()
     clf.fit(x_train, y_train)
     end_time = default_timer()
@@ -65,37 +66,42 @@ def run_random_forest_classification(x_train: np.ndarray,
 
     plt.close()
     print(f"Accuracy - {class_type}: {accuracy_score(y_test, predict)}")
-    print(f"F1 Score - {class_type}: {f1_score(y_test, predict, average='micro')}")
-    print(f"Precision - {class_type}: {precision_score(y_test, predict, average='micro')}")
-    print(f"Recall - {class_type}: {recall_score(y_test, predict, average='micro')}")
+    print(f"F1 Score - {class_type}: {f1_score(y_test, predict, average='weighted')}")
+    print(f"Precision - {class_type}: {precision_score(y_test, predict, average='weighted')}")
+    print(f"Recall - {class_type}: {recall_score(y_test, predict, average='weighted')}")
 
 
 if __name__ == '__main__':
     print("Reading data")
     training = util.get_clean_dataframe_from_file(DataDir.all_tables)
     training = util.convert_input_column_type(training)
+    #
+    # print(training['attack_cat'].value_counts())
+    # print(training['attack_cat'].cat.codes)
+    # print(training['attack_cat'].cat.categories)
+    # print(dict(zip(training['attack_cat'].cat.codes, training['attack_cat'])))
+    #
+    # # Binary PCA
+    #
+    # # use training data for prediction
+    # x_train, y_train = util.get_input_output(training, class_type='binary')
+    # start_time = default_timer()
+    #
+    # # scale the data for use with PCA
+    # scaler = StandardScaler()
+    # x_train = scaler.fit_transform(x_train)
+    #
+    # # apply principal components analysis
+    # pca = PCA(0.99, random_state=42)
+    # x_train = pca.fit_transform(x_train)
+    #
+    # end_time = default_timer()
+    #
+    # print(f'Total time to run PCA (with scaling): {end_time - start_time} seconds')
 
-    print(training['attack_cat'].value_counts())
-    print(training['attack_cat'].cat.codes)
-    print(training['attack_cat'].cat.categories)
-    print(dict(zip(training['attack_cat'].cat.codes, training['attack_cat'])))
-
-    # Binary PCA
-
-    # use training data for prediction
-    x_train, y_train = util.get_input_output(training, class_type='binary')
-
-    # scale the data for use with PCA
-    scaler = StandardScaler()
-    x_train = scaler.fit_transform(x_train)
-
-    # apply principal components analysis
-    pca = PCA(0.99, random_state=42)
-    x_train = pca.fit_transform(x_train)
-
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_random_forest_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True,
-                                     class_type='binary')
+    # x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
+    # run_random_forest_classification(x_train, y_train, x_test, y_test, reduced=True, contains_benign=True,
+    #                                  class_type='binary')
 
     # Multiclass PCA
 

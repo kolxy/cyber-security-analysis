@@ -26,7 +26,7 @@ def run_knn(x_train: np.ndarray,
             reduced: bool) -> None:
     clf = KNeighborsClassifier(n_neighbors=3,
                                metric='euclidean',
-                               algorithm='brute',
+                               algorithm='ball_tree',
                                n_jobs=-1)
     print(f"Fitting - reduced? {reduced} - class type? {class_type} - benign? {contains_benign}")
     start_time = default_timer()
