@@ -174,6 +174,7 @@ def get_input_output(df: pd.DataFrame,
 
     :param df: An input dataframe that has all numeric types.
     :param class_type: The type of classifier we are making (binary|multiclass).
+    :param benign_include: Whether or not to include benign data.
     :return: The input and output data for use with sklearn models.
     """
     if not benign_include:
@@ -225,7 +226,8 @@ def get_input_output_famd(df: pd.DataFrame,
 
 def reduce_features(input_data: pd.DataFrame,
                     output_data: pd.DataFrame,
-                    output_data_type: str = 'binary') -> Tuple[object, pd.DataFrame]:
+                    output_data_type: str = 'binary',
+                    benign_include: bool = False) -> Tuple[object, pd.DataFrame]:
     """
     Reduces the features of input by performing feature selection
     with a random forest classifier.
@@ -233,26 +235,21 @@ def reduce_features(input_data: pd.DataFrame,
     :param input_data: Data with full feature set.
     :param output_data: Output labels.
     :param output_data_type: The type of the output data.
+    :param benign_include: Whether there is benign data.
     :return: Data with reduced feature set, and the random forest classifier
     for performing shapley value analysis.
     """
     if exists(f'output/{output_data_type}_rf_classifier.joblib'):
-        clf = load(f'output/{output_data_type}_rf_classifier.joblib')
+        clf = load(f'output/{output_data_type}_rf_{"benign" if benign_include else "no_benign"}_classifier.joblib')
     else:
         clf = RandomForestClassifier(max_depth=None, n_estimators=150)
         clf = clf.fit(input_data, output_data)
-        dump(clf, f'output/{output_data_type}_rf_classifier.joblib')
+        dump(clf, f'output/{output_data_type}_rf_{"benign" if benign_include else "no_benign"}_classifier.joblib')
 
     return clf, SelectFromModel(clf, prefit=True).transform(input_data)
 
 
 def convert_input_column_type(df: pd.DataFrame):
-    """
-    equivalent to pivot_wider() in R
-    convert input column to all numeric types
-
-    IMPORTANT: srcip and dstip should be dropped separately
-    """
     # convert time to timestamp
     if 'stime' in df.columns:
         df['stime'] = df.stime.values.astype(int) // 10**9

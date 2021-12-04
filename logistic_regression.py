@@ -6,7 +6,6 @@ from matplotlib import pyplot as plt
 import util
 from constants import DataDir
 import os
-import prince
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
@@ -29,6 +28,9 @@ def main():
 
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='binary')
+
+    _, x_train_reduced = util.reduce_features(input_data=x_train, output_data=y_train, output_data_type='binary')
+    print(x_train_reduced)
 
     print(f'Shape of x_train: {x_train.shape}, Shape of y_train {y_train.shape}')
 
@@ -56,6 +58,12 @@ def main():
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
 
+    _, x_train_reduced = util.reduce_features(input_data=x_train,
+                                              output_data=y_train,
+                                              output_data_type='multiclass',
+                                              benign_include=True)
+    print(x_train_reduced)
+
     print(y_train)
 
     # scale the data for use with PCA
@@ -71,6 +79,12 @@ def main():
 
     # use training data for prediction
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
+
+    _, x_train_reduced = util.reduce_features(input_data=x_train,
+                                              output_data=y_train,
+                                              output_data_type='multiclass',
+                                              benign_include=False)
+    print(x_train_reduced)
 
     # scale the data for use with PCA
     scaler = StandardScaler()
