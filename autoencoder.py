@@ -5,6 +5,7 @@ from tensorflow import keras
 from tensorflow.keras import layers as l
 from sklearn.preprocessing import StandardScaler
 from sklearn import preprocessing as skpp
+import numpy as np
 
 import util
 from constants import DataDir
@@ -12,6 +13,13 @@ import constants as gv
 
 NTIMESTEPS = 16
 _DROPOUT_DEFAULT = 0.25
+_LEAKY_ALPHA_DEFAULT = 0.2
+_OPTIMIZER = keras.optimizers.Adam(2e-4, 0.5)
+_LOSSFUNC = keras.losses.MeanSquaredError()
+_KERNELINIT = keras.initializers.RandomNormal(stddev=0.02)
+_METRICS = [keras.metrics.RootMeanSquaredError(),
+            keras.losses.MeanAbsolutePercentageError(),
+            keras.losses.CosineSimilarity(),]
 
 class min_max():
     def __init__(self, xy:gv.x_y):
@@ -80,11 +88,29 @@ def conv_block(
         x = l.Dropout(drop_value)(x)
     return x
 
-def get_ae(nInputs, nLatent):
-    model = l.InputLayer(input_shape=(NTIMESTEPS))
+def get_ae(nInputs):
+    inLayer = l.Input(shape=(NTIMESTEPS, nInputs))
+    featSizeFactor = 1.4
+    featSize = nInputs * featSizeFactor
+    x = conv_block(inLayer, featSize, l.LeakyReLU(_LEAKY_ALPHA_DEFAULT))
+    for i in range(2):
+        featSize *= featSizeFactor
+        x = conv_block(x, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT))
+    featSize *= featSizeFactor
+    latent = conv_block(x, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT))
+    featSize /= featSizeFactor
+    x = upsample_block(latent, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT))
+    for i in range(2):
+        featSize /= featSizeFactor
+        x = upsample_block(x, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT))
 
-    return
+    featSize /= featSizeFactor
+    x = upsample_block(x, int(featSize), keras.activations.sigmoid)
+    model = keras.models.Model([inLayer], [x, latent], name="AutoEncoder")
+    model.compile(optimizer=_OPTIMIZER, loss=_LOSSFUNC, metrics=_METRICS)
+    return model
 
 if __name__ == "__main__":
-    get_data()
+    # df = get_data()
+    model = get_ae(150)
     exit()
