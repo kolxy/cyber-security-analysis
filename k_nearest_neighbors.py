@@ -41,8 +41,8 @@ def main():
 
     # PCA
     x_train, y_train = util.get_input_output(training, class_type='binary')
-    scaler = StandardScaler()  # scale the data for use with PCA
-    x_train = scaler.fit_transform(x_train)
+    feature_scale = StandardScaler()  # scale the data for use with PCA
+    x_train = feature_scale.fit_transform(x_train)
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
@@ -69,8 +69,8 @@ def main():
 
     # PCA
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    scaler = StandardScaler()  # scale the data for use with PCA
-    x_train = scaler.fit_transform(x_train)
+    feature_scale = StandardScaler()  # scale the data for use with PCA
+    x_train = feature_scale.fit_transform(x_train)
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
@@ -96,8 +96,8 @@ def main():
 
     # PCA WITHOUT benign labels
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    scaler = StandardScaler()
-    x_train = scaler.fit_transform(x_train)
+    feature_scale = StandardScaler()
+    x_train = feature_scale.fit_transform(x_train)
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
