@@ -22,7 +22,14 @@ def main():
     training = util.get_clean_dataframe_from_file(DataDir.all_tables)
     training = util.convert_input_column_type(training)
 
-    util.log(training['attack_cat'].value_counts())
+    # print out information about the dataset
+    temp = training
+    util.log(temp['attack_cat'].value_counts())
+    util.log('Unreduced (benign included) label code mapping')
+    util.log(dict(zip(temp['attack_cat'].cat.codes, temp['attack_cat'])))
+    temp = temp[temp['attack_cat'] != 'benign']
+    util.log('Reduced (no benign) label code mapping')
+    util.log(dict(zip(temp['attack_cat'].cat.codes, temp['attack_cat'])))
 
     # Binary
     # Raw training data
@@ -51,9 +58,6 @@ def main():
     # Multi-class
     # Raw training data
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    util.log('Unreduced (benign included) label code mapping')
-    util.log(dict(zip(y_train['attack_cat'].cat.codes, y_train['attack_cat'])))
-
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_k_nearest_neighbors(x_train, y_train, x_test, y_test, MODE.multi)
 
@@ -79,9 +83,6 @@ def main():
     # No benign
     # Raw training data WITHOUT benign labels
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    util.log('Reduced (no-benign) label code mapping')
-    util.log(dict(zip(y_train['attack_cat'].cat.codes, y_train['attack_cat'])))
-
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_k_nearest_neighbors(x_train, y_train, x_test, y_test, MODE.no_benign)
 
