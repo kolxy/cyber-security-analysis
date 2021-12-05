@@ -144,3 +144,4 @@ data/*.h5
 data/sample
 .idea/
 kerasModels/
+misc/

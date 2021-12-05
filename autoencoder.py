@@ -5,12 +5,14 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers as l
 import numpy as np
+import copy
 
-
+import constants
 import util
 import constants as gv
 import timeDataProcessing as tdp
-from model_paths import keras_model_paths
+from file_paths import keras_model_paths
+import distribution_analysis as da
 
 NTIMESTEPS = 16
 _DROPOUT_DEFAULT = 0.25
@@ -62,7 +64,7 @@ def conv_block(
 class autoencoder():
     encoderName = "encoder"
     decoderName = "decoder"
-    _defaultDir = keras_model_paths.directory.aeModels
+    _defaultDir = keras_model_paths.directory.autoencoderModels
     def __init__(self, encoder, decoder):
         self.encoder = encoder
         self.decoder = decoder
@@ -91,38 +93,40 @@ class autoencoder():
 
     @staticmethod
     def create_ae(nInputs):
+
         inLayer = l.Input(shape=(NTIMESTEPS, nInputs))
-        featSizeFactor = 1.4
-        featSize = nInputs * featSizeFactor
-        x = conv_block(inLayer, featSize, l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_DOWNSAMPLE_KW)
+        featSizeFactor = 1.35
+        featSizesDec = [nInputs]
+        for i in range(4):
+            featSizesDec.append(np.round(featSizesDec[-1]*featSizeFactor).astype(int))
+        featSizesEnc = copy.deepcopy(featSizesDec)[::-1]
+        featSizesEnc.pop()
+
+        x = conv_block(inLayer, featSizesEnc.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_DOWNSAMPLE_KW)
         for i in range(2):
-            featSize *= featSizeFactor
-            x = conv_block(x, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_DOWNSAMPLE_KW)
-        featSize *= featSizeFactor
-        x = conv_block(x, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_DOWNSAMPLE_KW)
+            x = conv_block(x, featSizesEnc.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_DOWNSAMPLE_KW)
+        x = conv_block(x, featSizesEnc.pop(), keras.activations.sigmoid, **_DOWNSAMPLE_KW)
         encoder = keras.models.Model(inLayer, x, name=autoencoder.encoderName)
 
-        inLayer = l.Input(shape=(1, int(featSize)))
-        featSize /= featSizeFactor
-        x = conv_block(inLayer, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW)
+        inLayer = l.Input(shape=(1, featSizesDec.pop()))
+        x = conv_block(inLayer, featSizesDec.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW)
         for i in range(2):
-            featSize /= featSizeFactor
-            x = conv_block(x, int(featSize), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW)
+            x = conv_block(x, featSizesDec.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW)
 
-        featSize /= featSizeFactor
-        x = conv_block(x, int(featSize), keras.activations.sigmoid, **_UPSAMPLE_KW)
+        x = conv_block(x, featSizesDec.pop(), keras.activations.sigmoid, **_UPSAMPLE_KW)
         decoder = keras.models.Model([inLayer], x, name=autoencoder.decoderName)
+        print(encoder.summary())
+        print(decoder.summary())
         return autoencoder(encoder, decoder)
 
 
 
-def train_ae(windows, load):
+def train_ae(ae:autoencoder, windows):
     stepsPerEpoch = 2 if gv.DEBUG else None
     epochs = 2 if gv.DEBUG else 1
     useValidation=True
 
     callbacks = [keras.callbacks.EarlyStopping(monitor="val_loss" if useValidation else "loss", patience=0)]
-    ae = autoencoder.load_ae() if load else autoencoder.create_ae(windows.shape[-1])
     ae.model.fit(
         windows, windows, validation_split=.25 if useValidation else 0., callbacks=callbacks,
         steps_per_epoch=stepsPerEpoch, epochs=epochs
@@ -132,12 +136,31 @@ def train_ae(windows, load):
         ae.save()
     return ae
 
+def benign_malicious_latent(ae:autoencoder, benign, hetero):
+    benignOut = ae.encoder(benign.windows).numpy()
+    heteroOut = ae.encoder(hetero.windows).numpy()
+    # da.kolm_smirnov_analysis(benignOut, heteroOut, "Benign versus Malicious")
+    return
+
+
 
 
 if __name__ == "__main__":
+    if gv.DEBUG: gv.enable_tf_debug()
     nw = tdp.network_window.get_window_data(NTIMESTEPS)
     benign = nw.get_homogeneous_benign()
     hetero = nw.get_only_heterogeneous()
-    ae = train_ae(benign.windows, load=False)
+
+    # load = True
+    load = False
+    # fit = False
+    fit=True
+
+    ae = autoencoder.load_ae() if load else autoencoder.create_ae(nw.windows.shape[-1])
+    if fit: ae = train_ae(ae, benign.windows)
+    benign_malicious_latent(ae, benign, hetero)
+
+
+
 
     exit()
