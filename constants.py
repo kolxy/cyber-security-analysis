@@ -1,6 +1,7 @@
 import datetime
 import numpy as np
 import sys
+import copy
 
 from dataclasses import dataclass
 
