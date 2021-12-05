@@ -18,7 +18,8 @@ NTIMESTEPS = 16
 _DROPOUT_DEFAULT = 0.25
 _LEAKY_ALPHA_DEFAULT = 0.2
 _OPTIMIZER = keras.optimizers.Adam(2e-4, 0.5)
-_LOSSFUNC = keras.losses.MeanSquaredError()
+# _LOSSFUNC = keras.losses.MeanSquaredError()
+_LOSSFUNC = keras.losses.CosineSimilarity()
 _KERNELINIT = keras.initializers.RandomNormal(stddev=0.02)
 _METRICS = [keras.metrics.MeanAbsoluteError(),
             keras.losses.CosineSimilarity(),]
@@ -43,7 +44,7 @@ def conv_block(
     drop_value=_DROPOUT_DEFAULT,
 ):
     if use_bn:
-        use_bias=False
+        use_bias=False #batch normalization internalizes the bias
     if up_size > 1: x = l.UpSampling1D(up_size)(x)
     x = l.Conv1D(
         filters, kernel_size, strides=strides, padding=padding, use_bias=use_bias,
@@ -93,25 +94,31 @@ class autoencoder():
 
     @staticmethod
     def create_ae(nInputs):
+        aeLayerDefArgs = {"use_bn":True}
+        visualFeatSizeFactor = .68
+        quantitativeSizeFactor = .8
 
         inLayer = l.Input(shape=(NTIMESTEPS, nInputs))
-        featSizeFactor = 1.35
+        featSizeFactor = visualFeatSizeFactor #.7 and 14 give -.96; .68 and 12 give -.95
         featSizesDec = [nInputs]
         for i in range(4):
             featSizesDec.append(np.round(featSizesDec[-1]*featSizeFactor).astype(int))
         featSizesEnc = copy.deepcopy(featSizesDec)[::-1]
         featSizesEnc.pop()
 
-        x = conv_block(inLayer, featSizesEnc.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_DOWNSAMPLE_KW)
+        x = conv_block(inLayer, featSizesEnc.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT),
+                       **_DOWNSAMPLE_KW, **aeLayerDefArgs,)
         for i in range(2):
-            x = conv_block(x, featSizesEnc.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_DOWNSAMPLE_KW)
-        x = conv_block(x, featSizesEnc.pop(), keras.activations.sigmoid, **_DOWNSAMPLE_KW)
+            x = conv_block(x, featSizesEnc.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT),
+                           **_DOWNSAMPLE_KW, **aeLayerDefArgs,)
+
+        x = conv_block(x, featSizesEnc.pop(), keras.activations.sigmoid, **_DOWNSAMPLE_KW, **aeLayerDefArgs,)
         encoder = keras.models.Model(inLayer, x, name=autoencoder.encoderName)
 
         inLayer = l.Input(shape=(1, featSizesDec.pop()))
-        x = conv_block(inLayer, featSizesDec.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW)
+        x = conv_block(inLayer, featSizesDec.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW, **aeLayerDefArgs,)
         for i in range(2):
-            x = conv_block(x, featSizesDec.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW)
+            x = conv_block(x, featSizesDec.pop(), l.LeakyReLU(_LEAKY_ALPHA_DEFAULT), **_UPSAMPLE_KW, **aeLayerDefArgs,)
 
         x = conv_block(x, featSizesDec.pop(), keras.activations.sigmoid, **_UPSAMPLE_KW)
         decoder = keras.models.Model([inLayer], x, name=autoencoder.decoderName)
@@ -123,10 +130,10 @@ class autoencoder():
 
 def train_ae(ae:autoencoder, windows):
     stepsPerEpoch = 2 if gv.DEBUG else None
-    epochs = 2 if gv.DEBUG else 1
+    epochs = 2 if gv.DEBUG else 10
     useValidation=True
 
-    callbacks = [keras.callbacks.EarlyStopping(monitor="val_loss" if useValidation else "loss", patience=0)]
+    callbacks = [keras.callbacks.EarlyStopping(monitor="val_loss" if useValidation else "loss", patience=1)]
     ae.model.fit(
         windows, windows, validation_split=.25 if useValidation else 0., callbacks=callbacks,
         steps_per_epoch=stepsPerEpoch, epochs=epochs
