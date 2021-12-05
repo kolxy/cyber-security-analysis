@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
+import logistic_regression
 import util
 from constants import DataDir
 from constants import MODE
@@ -39,10 +40,8 @@ def main():
 
     # Top features from random forest
     x_train, y_train = util.get_input_output(training, class_type='binary')
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='binary',
-                                      benign_include=True)
+    top_features = logistic_regression.run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_k_nearest_neighbors(x_train, y_train, x_test, y_test, MODE.binary_reduced)
 
@@ -63,11 +62,8 @@ def main():
 
     # Top features from above
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    # x_train = x_train[[x[0] for x in top_features]]
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='multiclass',
-                                      benign_include=True)
+    top_features = logistic_regression.run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_k_nearest_neighbors(x_train, y_train, x_test, y_test, MODE.multi_reduced)
 
@@ -88,10 +84,8 @@ def main():
 
     # Top features from above WITHOUT benign labels
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='multiclass',
-                                      benign_include=False)
+    top_features = logistic_regression.run_logistic_regression(x_train, y_train, x_test, y_test, MODE.no_benign)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_k_nearest_neighbors(x_train, y_train, x_test, y_test, MODE.no_benign_reduced)
 

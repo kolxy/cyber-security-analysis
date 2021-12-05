@@ -263,4 +263,8 @@ def convert_input_column_type(df: pd.DataFrame):
 
 def log(string):
     date_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    print(f"{date_time} >>> {string}")
+    if '\n' in string:
+        print(f'{date_time} >>>')
+        print(f'{string}')
+    else:
+        print(f"{date_time} >>> {string}")

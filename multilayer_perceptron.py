@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow.python.keras.utils.np_utils import to_categorical
 
+import logistic_regression
 import model_utils
 import util
 from constants import DataDir
@@ -39,12 +40,10 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.binary, class_type='binary')
 
-    # Top features from random forest
+    # Top features from logistic regression
     x_train, y_train = util.get_input_output(training, class_type='binary')
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='binary',
-                                      benign_include=True)
+    top_features = logistic_regression.run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.binary_reduced, class_type='binary')
 
@@ -65,11 +64,8 @@ def main():
 
     # Top features from above
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    # x_train = x_train[[x[0] for x in top_features]]
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='multiclass',
-                                      benign_include=True)
+    top_features = logistic_regression.run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.multi_reduced, class_type='multiclass')
 
@@ -90,10 +86,8 @@ def main():
 
     # Top features from above WITHOUT benign labels
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='multiclass',
-                                      benign_include=False)
+    top_features = logistic_regression.run_logistic_regression(x_train, y_train, x_test, y_test, MODE.no_benign)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.no_benign_reduced, class_type='multiclass')
 
