@@ -256,6 +256,7 @@ def convert_input_column_type(df: pd.DataFrame):
         df['ltime'] = df.ltime.values.astype(int) // 10**9
     return df
 
+
 def log(string):
     date_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     print(f"{date_time} >>> {string}")
