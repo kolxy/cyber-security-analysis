@@ -35,15 +35,11 @@ def main():
     # Raw training data
     x_train, y_train = util.get_input_output(training, class_type='binary')
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary)
+    top_features = run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary)
 
     # Top features from above
     x_train, y_train = util.get_input_output(training, class_type='binary')
-    # x_train = x_train[[x[0] for x in top_features]]
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='binary',
-                                      benign_include=True)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary_reduced)
 
@@ -60,15 +56,11 @@ def main():
     # Raw training data
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi)
+    top_features = run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi)
 
     # Top features from above
     x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    # x_train = x_train[[x[0] for x in top_features]]
-    _, x_train = util.reduce_features(input_data=x_train,
-                                      output_data=y_train,
-                                      output_data_type='multiclass',
-                                      benign_include=True)
+    x_train = x_train[[x[0] for x in top_features]]
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi_reduced)
 
@@ -169,6 +161,8 @@ def run_logistic_regression(x_train,
         util.log(PATH_OUTPUT + f"Logistic Regression feature importance - {mode.value}.png")
 
         plt.close()
+
+        return top
 
 
 if __name__ == '__main__':
