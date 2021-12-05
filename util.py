@@ -9,7 +9,7 @@ from os.path import exists
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
 from typing import Tuple
-
+from datetime import datetime
 
 def merge_times_into_frequency(time_array: np.ndarray, time_window: int = 60) -> np.ndarray:
     """
@@ -255,3 +255,7 @@ def convert_input_column_type(df: pd.DataFrame):
         df['stime'] = df.stime.values.astype(int) // 10**9
         df['ltime'] = df.ltime.values.astype(int) // 10**9
     return df
+
+def log(string):
+    date_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+    print(f"{date_time} >>> {string}")

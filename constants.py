@@ -2,6 +2,7 @@ import datetime
 import numpy as np
 import sys
 import copy
+import enum
 
 from dataclasses import dataclass
 
@@ -154,3 +155,30 @@ def enable_gpu():
     import os
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+class MODE(enum.Enum):
+    binary = "binary"
+    binary_reduced = "binary reduced"
+    binary_PCA = "binary PCA"
+    multi = "multi-class"
+    multi_reduced = "multi-class reduced"
+    multi_PCA = "multi-class PCA"
+    no_benign = "multi-class no benign"
+    no_benign_reduced = "multi-class no benign reduced"
+    no_benign_PCA = "multi-class no benign PCA"
+    
+    @staticmethod
+    def is_binary(m):
+        return (m == MODE.binary) | (m == MODE.binary_reduced) | (m == MODE.binary_PCA)
+
+    @staticmethod
+    def is_raw(m):
+        return (m == MODE.binary) | (m == MODE.multi) | (m == MODE.no_benign)
+
+    @staticmethod
+    def is_reduced(m):
+        return (m == MODE.binary_reduced) | (m == MODE.multi_reduced) | (m == MODE.no_benign_reduced)
+
+    @staticmethod
+    def is_PCA(m):
+        return m == (MODE.binary_PCA) | m == (MODE.multi_PCA) | m == (MODE.no_benign_PCA)
