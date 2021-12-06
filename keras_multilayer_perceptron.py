@@ -51,7 +51,7 @@ def run_mlp_classification(x_train: np.ndarray,
         epochs=200,
         batch_size=1000,
         callbacks=[callback],
-        verbose=1
+        verbose=0
     )
     end_time = default_timer()
     print(f'Total time to fit: {end_time - start_time} seconds')

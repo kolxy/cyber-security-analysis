@@ -1,16 +1,15 @@
 import os
 
 import numpy as np
-from tensorflow.keras.callbacks import EarlyStopping
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay, f1_score, precision_score, \
     recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.python.keras.utils.np_utils import to_categorical
 
-import logistic_regression
 import model_utils
 import util
 from constants import DataDir
@@ -123,7 +122,7 @@ def run_multilayer_perceptron(x_train,
         epochs=200,
         batch_size=1000,
         callbacks=[callback],
-        verbose=1
+        verbose=0
     )
 
     util.log(f"Predicting")

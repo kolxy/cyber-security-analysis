@@ -265,11 +265,7 @@ def convert_input_column_type(df: pd.DataFrame):
 
 def log(string):
     date_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    if '\n' in string:
-        print(f'{date_time} >>>')
-        print(f'{string}')
-    else:
-        print(f"{date_time} >>> {string}")
+    print(f"{date_time} >>> {string}")
 
 
 def run_logistic_regression_feature_reduction(x_train,
