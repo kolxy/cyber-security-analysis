@@ -40,10 +40,10 @@ def create_model_multiclass(x_size: int, y_size: int) -> Sequential:
     :param y_size: The number of classes that there could be.
     :return: A new model for performing predictions.
     """
+    # We <3 DaTa SciEnce!!
     model = Sequential([
         Dense(50, input_dim=x_size, activation='relu',  kernel_initializer='uniform'),
         Dense(50,  activation='relu', kernel_initializer='uniform'),
-        Dense(50, activation='relu', kernel_initializer='uniform'),
         Dense(y_size, activation='softmax', kernel_initializer='uniform')
     ])
 

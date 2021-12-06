@@ -95,10 +95,12 @@ class DataDir:
         'label': parse_integers
     }
 
+
 def enable_tf_debug(eager: object = True, debugMode: object = True) -> object:
     import tensorflow as tf
     tf.config.run_functions_eagerly(eager)
     if debugMode: tf.data.experimental.enable_debug_mode()
+
 
 def tf_np_behavior():
     import tensorflow.python.ops.numpy_ops.np_config as np_config

@@ -102,7 +102,6 @@ def run_logistic_regression(x_train,
                             mode):
     clf = LogisticRegression(max_iter=1500,
                              multi_class='multinomial',
-                             solver='saga',
                              penalty='l2',
                              n_jobs=-1)
     util.log("=============================Fitting=============================")

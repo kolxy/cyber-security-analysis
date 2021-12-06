@@ -10,7 +10,8 @@ df = get_mp_dataframe_from_file(DataDir.all_tables)
 # get January values
 january_day = '2015-01-21'
 jan_df = df[(df['stime'] < '2015-01-24') & (df['stime'] > '2015-01-20')]
-hosts_dos_attacked = jan_df[jan_df['attack_cat'] == 'DoS']['dstip'].unique()
+print(jan_df.columns)
+hosts_dos_attacked = jan_df[jan_df['attack_cat'] == 'dos']['dstip'].unique()
 connection_frequencies_january = get_host_connection_frequency(jan_df, hosts_dos_attacked[0])
 
 profile_by_minutes = 5
@@ -44,7 +45,7 @@ plt.show()
 # get February values
 february_day = '2015-02-18'
 feb_df = df[(df['stime'] < '2015-02-20') & (df['stime'] > '2015-02-17')]
-hosts_dos_attacked = feb_df[feb_df['attack_cat'] == 'DoS']['dstip'].unique()
+hosts_dos_attacked = feb_df[feb_df['attack_cat'] == 'dos']['dstip'].unique()
 connection_frequencies_february = get_host_connection_frequency(feb_df, hosts_dos_attacked[0])
 
 profile_by_minutes = 5
