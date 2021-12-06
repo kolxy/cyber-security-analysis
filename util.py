@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 import category_encoders as ce
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.preprocessing import LabelEncoder
 
-from constants import DataDir
+from constants import DataDir, MODE
 from joblib import dump, load
 from os.path import exists
 from sklearn.ensemble import RandomForestClassifier
@@ -268,3 +270,31 @@ def log(string):
         print(f'{string}')
     else:
         print(f"{date_time} >>> {string}")
+
+
+def run_logistic_regression_feature_reduction(x_train,
+                                              y_train,
+                                              x_test,
+                                              y_test,
+                                              mode):
+    clf = LogisticRegression(max_iter=1500,
+                             multi_class='multinomial',
+                             solver='saga',
+                             penalty='l2',
+                             n_jobs=-1)
+    clf.fit(x_train, y_train)
+    predict = clf.predict(x_test)
+
+    # Confusion matrix
+    cm = confusion_matrix(y_test, predict)
+    display_cm = ConfusionMatrixDisplay(confusion_matrix=cm)
+    display_cm.plot()
+
+    # feature importance
+    if MODE.is_raw(mode):
+        # create importance dictionary as {name: importance}
+        feature_dict = dict(zip(x_train.columns, np.std(x_train, 0) * clf.coef_[0]))
+        feature_importance = [(k, v) for k, v in feature_dict.items()]
+        sorted_list = sorted(feature_importance, key=lambda x: abs(x[1]), reverse=True)
+
+        return sorted_list[:4]
