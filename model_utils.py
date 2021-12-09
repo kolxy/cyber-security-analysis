@@ -17,13 +17,13 @@ def create_model_binary(x_size: int) -> Sequential:
     :return: A new model for performing predictions.
     """
     model = Sequential([
-        Dense(200, input_dim=x_size, kernel_initializer='uniform'),
+        Dense(200, input_dim=x_size),
         LeakyReLU(alpha=0.2),
-        Dense(100, kernel_initializer='uniform'),
+        Dense(100),
         LeakyReLU(alpha=0.2),
-        Dense(50, activation='relu', kernel_initializer='uniform'),
+        Dense(50),
         LeakyReLU(alpha=0.2),
-        Dense(1, activation='sigmoid', kernel_initializer='uniform')
+        Dense(1, activation='sigmoid')
     ])
 
     optimizer = Adam(learning_rate=1e-3, name="Adam")
@@ -47,13 +47,13 @@ def create_model_multiclass(x_size: int, y_size: int) -> Sequential:
     """
     # We <3 DaTa SciEnce!!
     model = Sequential([
-        Dense(200, input_dim=x_size, kernel_initializer='uniform'),
+        Dense(200, input_dim=x_size),
         LeakyReLU(alpha=0.2),
-        Dense(100, kernel_initializer='uniform'),
+        Dense(100),
         LeakyReLU(alpha=0.2),
-        Dense(50, activation='relu', kernel_initializer='uniform'),
+        Dense(50),
         LeakyReLU(alpha=0.2),
-        Dense(1, activation='sigmoid', kernel_initializer='uniform')
+        Dense(y_size, activation='softmax')
     ])
 
     optimizer = Adam(learning_rate=1e-3, name="Adam")
