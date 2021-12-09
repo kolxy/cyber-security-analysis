@@ -41,7 +41,7 @@ def main():
     x_train, y_train = util.get_input_output(training, class_type='binary')
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
-    util.log(f'The number of principal components is: {x_train.shape[0]}')
+    util.log(f'The number of principal components is: {x_train.shape[1]}')
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary_PCA)
 
