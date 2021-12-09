@@ -35,60 +35,23 @@ def main():
     # Raw training data
     x_train, y_train = util.get_input_output(training, class_type='binary')
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    top_features = run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary)
-
-    # Top features from above
-    x_train, y_train = util.get_input_output(training, class_type='binary')
-    x_train = x_train[[x[0] for x in top_features]]
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary_reduced)
+    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary)
 
     # PCA
     x_train, y_train = util.get_input_output(training, class_type='binary')
-    feature_scale = StandardScaler()  # scale the data for use with PCA
-    x_train = feature_scale.fit_transform(x_train)
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary_PCA)
 
-    # Multi-class
-    # Raw training data
-    x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    top_features = run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi)
-
-    # Top features from above
-    x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    x_train = x_train[[x[0] for x in top_features]]
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi_reduced)
-
-    # PCA
-    x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    feature_scale = StandardScaler()  # scale the data for use with PCA
-    x_train = feature_scale.fit_transform(x_train)
-    pca = PCA(0.99, random_state=42)
-    x_train = pca.fit_transform(x_train)
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.multi_PCA)
-
     # No benign
     # Raw training data WITHOUT benign labels
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    top_features = run_logistic_regression(x_train, y_train, x_test, y_test, MODE.no_benign)
-
-    # Top features from above WITHOUT benign labels
-    x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    x_train = x_train[[x[0] for x in top_features]]
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.no_benign_reduced)
+    run_logistic_regression(x_train, y_train, x_test, y_test, MODE.no_benign)
 
     # PCA WITHOUT benign labels
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    feature_scale = StandardScaler()
-    x_train = feature_scale.fit_transform(x_train)
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
@@ -100,10 +63,12 @@ def run_logistic_regression(x_train,
                             x_test,
                             y_test,
                             mode):
-    clf = LogisticRegression(max_iter=1500,
+    clf = LogisticRegression(max_iter=2000,
                              multi_class='multinomial',
+                             solver='saga',
                              penalty='l2',
-                             n_jobs=-1)
+                             n_jobs=-1,
+                             random_state=42)
     util.log("=============================Fitting=============================")
     util.log(f"Current type: {mode.value}")
     clf.fit(x_train, y_train)
@@ -128,37 +93,6 @@ def run_logistic_regression(x_train,
         util.log(f"F1 Score - {mode.value}: {f1_score(y_test, predict)}")
         util.log(f"Precision - {mode.value}: {precision_score(y_test, predict)}")
         util.log(f"Recall - {mode.value}: {recall_score(y_test, predict)}")
-
-    # feature importance
-    if MODE.is_raw(mode):
-        util.log("Generating graph")
-
-        # create importance dictionary as {name: importance}
-        feature_dict = dict(zip(x_train.columns, np.std(x_train, 0) * clf.coef_[0]))
-        feature_importance = [(k, v) for k, v in feature_dict.items()]
-        sorted_list = sorted(feature_importance, key=lambda x: abs(x[1]), reverse=True)
-
-        top = sorted_list[:10]
-        top_names = [x[0] for x in top]
-        top_values = [x[1] for x in top]
-
-        # output graph
-        plt.barh(top_names, top_values)
-        plt.gca().invert_yaxis()
-        plt.title(f"Logistic regression feature importance {mode.value}")
-
-        plt.xlabel("Importance")
-        plt.ylabel("Feature name")
-        for index, value in enumerate(top_values):
-            plt.text(value, index, str("{:.2e}".format(float(value))))
-
-        plt.savefig(PATH_OUTPUT + f"Logistic Regression feature importance - {mode.value}.png")
-        util.log("Output: ")
-        util.log(PATH_OUTPUT + f"Logistic Regression feature importance - {mode.value}.png")
-
-        plt.close()
-
-        return sorted_list[:4]
 
 
 if __name__ == '__main__':

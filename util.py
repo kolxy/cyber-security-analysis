@@ -3,7 +3,7 @@ import pandas as pd
 import category_encoders as ce
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from constants import DataDir, MODE
 from joblib import dump, load
@@ -200,6 +200,9 @@ def get_input_output(df: pd.DataFrame,
     input_data = encoder.fit_transform(input_data)
     input_data = input_data.astype(np.single)
 
+    feature_scale = StandardScaler()
+    input_data = feature_scale.fit_transform(input_data)
+
     return input_data, output_data
 
 
@@ -302,11 +305,12 @@ def run_logistic_regression_feature_reduction(x_train,
                                               x_test,
                                               y_test,
                                               mode):
-    clf = LogisticRegression(max_iter=1500,
+    clf = LogisticRegression(max_iter=2000,
                              multi_class='multinomial',
                              solver='saga',
                              penalty='l2',
-                             n_jobs=-1)
+                             n_jobs=-1,
+                             random_state=42)
     clf.fit(x_train, y_train)
     predict = clf.predict(x_test)
 

@@ -1,4 +1,5 @@
 import os
+from random import seed
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -8,6 +9,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDis
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.python.framework.random_seed import set_random_seed
 from tensorflow.python.keras.utils.np_utils import to_categorical
 
 import model_utils
@@ -17,6 +19,11 @@ from constants import MODE
 
 PATH_OUTPUT = os.getcwd() + "/output/multilayer_perceptron/"
 np.set_printoptions(threshold=np.inf)
+
+# give me... reproducible results!
+# https://machinelearningmastery.com/reproducible-results-neural-networks-keras/
+seed(42)
+set_random_seed(42)
 
 
 def main():
@@ -39,43 +46,13 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.binary, class_type='binary')
 
-    # Top features from logistic regression
-    x_train, y_train = util.get_input_output(training, class_type='binary')
-    top_features = util.run_logistic_regression_feature_reduction(x_train, y_train, x_test, y_test, MODE.binary)
-    x_train = x_train[[x[0] for x in top_features]]
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.binary_reduced, class_type='binary')
 
     # PCA
     x_train, y_train = util.get_input_output(training, class_type='binary')
-    feature_scale = StandardScaler()  # scale the data for use with PCA
-    x_train = feature_scale.fit_transform(x_train)
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.binary_PCA, class_type='binary')
-
-    # Multi-class
-    # Raw training data
-    x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.multi, class_type='multiclass')
-
-    # Top features from above
-    x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    top_features = util.run_logistic_regression_feature_reduction(x_train, y_train, x_test, y_test, MODE.multi)
-    x_train = x_train[[x[0] for x in top_features]]
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.multi_reduced, class_type='multiclass')
-
-    # PCA
-    x_train, y_train = util.get_input_output(training, class_type='multiclass')
-    feature_scale = StandardScaler()  # scale the data for use with PCA
-    x_train = feature_scale.fit_transform(x_train)
-    pca = PCA(0.99, random_state=42)
-    x_train = pca.fit_transform(x_train)
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.multi_PCA, class_type='multiclass')
 
     # No benign
     # Raw training data WITHOUT benign labels
@@ -83,17 +60,8 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.no_benign, class_type='multiclass')
 
-    # Top features from above WITHOUT benign labels
-    x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    top_features = util.run_logistic_regression_feature_reduction(x_train, y_train, x_test, y_test, MODE.no_benign)
-    x_train = x_train[[x[0] for x in top_features]]
-    x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
-    run_multilayer_perceptron(x_train, y_train, x_test, y_test, MODE.no_benign_reduced, class_type='multiclass')
-
     # PCA WITHOUT benign labels
     x_train, y_train = util.get_input_output(training, class_type='multiclass', benign_include=False)
-    feature_scale = StandardScaler()
-    x_train = feature_scale.fit_transform(x_train)
     pca = PCA(0.99, random_state=42)
     x_train = pca.fit_transform(x_train)
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
@@ -115,7 +83,7 @@ def run_multilayer_perceptron(x_train,
 
     util.log("=============================Fitting=============================")
     util.log(f"Current type: {mode.value}")
-    callback = EarlyStopping(monitor='loss', patience=3)
+    callback = EarlyStopping(monitor='loss', patience=5)
     clf.fit(
         x_train,
         y_train,
