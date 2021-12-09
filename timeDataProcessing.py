@@ -51,6 +51,14 @@ class network_window:
         else:
             return network_window.window_type.ALL_HETERO
 
+    def get_at_least_n_malicious(self, nMalicious):
+        assert self.windows.shape[0] == self.nMalicious.shape[0]
+        return self.windows[self.nMalicious >= nMalicious]
+
+    def get_n_malicious(self, nMalicious):
+        assert self.windows.shape[0] == self.nMalicious.shape[0]
+        return self.windows[self.nMalicious == nMalicious]
+
     def _get_homogeneous_benign_mask(self):
         assert self.windows.shape[0] == self.nMalicious.shape[0]
         return self.nMalicious == 0
@@ -72,10 +80,10 @@ class network_window:
         return nw
 
     @staticmethod
-    def get_window_data(nTimeSteps):
+    def get_window_data(nTimeSteps, firstN=None):
         data = get_min_max_data()
-        data.x = window_stack(data.x, nTimeSteps)
-        data.y = window_stack(data.y.to_numpy(), nTimeSteps)
+        data.x = window_stack(data.x[:firstN], nTimeSteps)
+        data.y = window_stack(data.y.to_numpy()[:firstN], nTimeSteps)
         data.y = data.y.sum(axis=-1)
         nw = network_window(data.x, data.y)
         return nw
