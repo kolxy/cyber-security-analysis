@@ -5,6 +5,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers as l
 import numpy as np
+import matplotlib.pyplot as plt
 import copy
 
 import constants
@@ -23,6 +24,7 @@ _LOSSFUNC = keras.losses.CosineSimilarity()
 _KERNELINIT = keras.initializers.RandomNormal(stddev=0.02)
 _METRICS = [keras.metrics.MeanAbsoluteError(),
             keras.losses.CosineSimilarity(),]
+_NDATA = 1000 if gv.DEBUG else None
 
 _UPSAMPLE_KW = {"strides": 1, "up_size": 2}
 _DOWNSAMPLE_KW = {"strides": 2, "up_size": 1}
@@ -73,6 +75,10 @@ class autoencoder():
         self.model.add(self.encoder)
         self.model.add(self.decoder)
         self.model.compile(optimizer=_OPTIMIZER, loss=_LOSSFUNC, metrics=_METRICS)
+
+    def evaluate(self, data, func):
+        pred = self.model(data)
+        return func(data, pred)
 
     @staticmethod
     def _enc_file_name(dir):
@@ -127,7 +133,6 @@ class autoencoder():
         return autoencoder(encoder, decoder)
 
 
-
 def train_ae(ae:autoencoder, windows):
     stepsPerEpoch = 2 if gv.DEBUG else None
     epochs = 2 if gv.DEBUG else 10
@@ -151,23 +156,23 @@ def benign_malicious_latent(ae:autoencoder, benign, hetero):
 
 
 
-
 if __name__ == "__main__":
     if gv.DEBUG: gv.enable_tf_debug()
-    nw = tdp.network_window.get_window_data(NTIMESTEPS)
+    nw = tdp.network_window.get_window_data(NTIMESTEPS, firstN=_NDATA)
     benign = nw.get_homogeneous_benign()
     hetero = nw.get_only_heterogeneous()
 
-    # load = True
-    load = False
-    # fit = False
-    fit=True
+    load = True
+    # load = False
+    fit = False
+    # fit=True
 
     ae = autoencoder.load_ae() if load else autoencoder.create_ae(nw.windows.shape[-1])
     if fit: ae = train_ae(ae, benign.windows)
-    benign_malicious_latent(ae, benign, hetero)
 
+    # benign_malicious_latent(ae, benign, hetero)
+    metric = keras.losses.CosineSimilarity()
+    da.line_plot_n_malicious(ae, nw, metric, ylabel="Cosine Similarity", name="Decoded Analysis")
 
-
-
+    plt.show()
     exit()

@@ -3,9 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import kstest
 
-
+import autoencoder
 import file_paths as fp
 import constants as gv
+import timeDataProcessing as tdp
+import autoencoder as autoenc
 
 _defaultDir = fp.images.directory.distributionAnalysis
 
@@ -71,3 +73,24 @@ def quantitative_analyses(windows1, windows2, name):
     kmStats = kolm_smirnov_analysis(windows1, windows2, name)
     return kmStats
 
+def line_plot_n_malicious(
+        ae:autoencoder.autoencoder,
+        networkWindow:tdp.network_window,
+        metric, nRange = (0,autoenc.NTIMESTEPS), name="", ylabel=""
+):
+    vals = []
+    for i in range(*nRange):
+        # print("Number of malicious", str(i) + "/" + str(nRange[1]))
+        vals.append(
+            float(ae.evaluate(networkWindow.get_n_malicious(i), metric))
+        )
+        # print(vals[-1])
+    xs = [i/nRange[1] for i in range(*nRange)]
+    ax = sns.lineplot(xs, vals)
+    ax.set_title(name)
+    ax.set_xlabel("Fraction of Malicious Packets")
+    ax.set_ylabel(ylabel)
+    sns.despine(ax=ax, top=False, right=False)
+    if not gv.DEBUG:
+        plt.savefig(fp.images.directory.distributionAnalysis + name.replace(" ", "") + ".png")
+    return vals
