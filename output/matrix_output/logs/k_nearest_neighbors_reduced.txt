@@ -1,0 +1,73 @@
+C:\Users\waltz\Documents\cyber-security-analysis\venv\Scripts\python.exe "C:\Program Files\JetBrains\PyCharm Community Edition 2021.2.3\plugins\python-ce\helpers\pydev\pydevd.py" --multiproc --qt-support=auto --client 127.0.0.1 --port 59041 --file C:/Users/waltz/Documents/cyber-security-analysis/k_nearest_neighbors.py
+Connected to pydev debugger (build 212.5457.59)
+2021/12/09 00:56:47 >>> Reading data
+2021/12/09 00:57:03 >>> benign            2218764
+generic            215481
+exploits            44525
+fuzzers             24246
+dos                 16353
+reconnaissance      13987
+analysis             2677
+backdoors            2329
+shellcode            1511
+worms                 174
+Name: attack_cat, dtype: int64
+2021/12/09 00:57:03 >>> Unreduced (benign included) label code mapping
+2021/12/09 00:57:04 >>> {2: 'benign', 7: 'reconnaissance', 4: 'exploits', 3: 'dos', 6: 'generic', 8: 'shellcode', 5: 'fuzzers', 9: 'worms', 1: 'backdoors', 0: 'analysis'}
+2021/12/09 00:57:04 >>> Reduced (no benign) label code mapping
+2021/12/09 00:57:04 >>> {7: 'reconnaissance', 4: 'exploits', 3: 'dos', 6: 'generic', 8: 'shellcode', 5: 'fuzzers', 9: 'worms', 1: 'backdoors', 0: 'analysis'}
+2021/12/09 00:57:54 >>> =============================Fitting=============================
+2021/12/09 00:57:54 >>> Current type: binary
+2021/12/09 00:59:46 >>> Predicting
+2021/12/09 08:45:58 >>> Generating confusion matrix
+2021/12/09 08:45:58 >>> K-Nearest Neighbors binary Confusion Matrix
+2021/12/09 08:45:58 >>> [[551141   3149]
+ [  3266  77456]]
+2021/12/09 08:45:58 >>> Accuracy - binary: 0.9898978287024497
+2021/12/09 08:45:58 >>> F1 Score - binary: 0.9602360423239755
+2021/12/09 08:45:59 >>> Precision - binary: 0.960932944606414
+2021/12/09 08:45:59 >>> Recall - binary: 0.9595401501449419
+2021/12/09 08:46:45 >>> The number of principal components is: 42
+2021/12/09 08:46:46 >>> =============================Fitting=============================
+2021/12/09 08:46:46 >>> Current type: binary PCA
+2021/12/09 08:47:23 >>> Predicting
+2021/12/09 11:49:49 >>> Generating confusion matrix
+2021/12/09 11:49:51 >>> K-Nearest Neighbors binary PCA Confusion Matrix
+2021/12/09 11:49:51 >>> [[551096   3194]
+ [  3266  77456]]
+2021/12/09 11:49:52 >>> Accuracy - binary PCA: 0.9898269638998948
+2021/12/09 11:49:53 >>> F1 Score - binary PCA: 0.9599682720670252
+2021/12/09 11:49:54 >>> Precision - binary PCA: 0.9603967761934284
+2021/12/09 11:49:55 >>> Recall - binary PCA: 0.9595401501449419
+2021/12/09 11:50:22 >>> =============================Fitting=============================
+2021/12/09 11:50:22 >>> Current type: multi-class no benign
+2021/12/09 11:50:44 >>> Predicting
+2021/12/09 12:06:54 >>> Generating confusion matrix
+2021/12/09 12:06:57 >>> K-Nearest Neighbors multi-class no benign Confusion Matrix
+2021/12/09 12:06:57 >>> [[  100    53   211   240    32    10     3     0     0]
+ [   84    18   191   215    58     6    11     2     0]
+ [  385   306  1378  1745   136    65    83    13     0]
+ [  511   409  2026  7099   547   151   378    19     0]
+ [  120   145   331   740  4378    19   343    34     0]
+ [   55    45   284   621   128 52606    57     3     1]
+ [   50    82   314   707   480    20  1835    11     0]
+ [    0     9    26    40   126     6   101    75     0]
+ [    0     1     2    23     1     2    10     0     5]]
+2021/12/09 12:06:58 >>> Accuracy - multi-class no benign: 0.8403032830766549
+2021/12/09 12:07:20 >>> =============================Fitting=============================
+2021/12/09 12:07:20 >>> Current type: multi-class no benign PCA
+2021/12/09 12:07:43 >>> Predicting
+2021/12/09 12:10:03 >>> Generating confusion matrix
+2021/12/09 12:10:05 >>> K-Nearest Neighbors multi-class no benign PCA Confusion Matrix
+2021/12/09 12:10:05 >>> [[   92    59   208   244    34     8     4     0     0]
+ [   70    23   195   212    67     6    10     2     0]
+ [  375   254  1373  1810   154    63    71    11     0]
+ [  494   363  2040  7117   562   165   381    18     0]
+ [  120   132   348   749  4343    24   356    38     0]
+ [   50    40   287   639   131 52594    55     3     1]
+ [   40    80   307   727   469    18  1846    12     0]
+ [    0     6    25    45   129     7    92    79     0]
+ [    0     1     3    23     1     2     9     0     5]]
+2021/12/09 12:10:05 >>> Accuracy - multi-class no benign PCA: 0.8400293821043064
+
+Process finished with exit code 0

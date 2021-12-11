@@ -34,6 +34,7 @@ def main():
     # Binary
     # Raw training data
     x_train, y_train = util.get_input_output(training, class_type='binary')
+    print(f'The number of unreduced features is: {x_train.shape[1]}')
     x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
     run_logistic_regression(x_train, y_train, x_test, y_test, MODE.binary)
 
@@ -94,6 +95,10 @@ def run_logistic_regression(x_train,
         util.log(f"F1 Score - {mode.value}: {f1_score(y_test, predict)}")
         util.log(f"Precision - {mode.value}: {precision_score(y_test, predict)}")
         util.log(f"Recall - {mode.value}: {recall_score(y_test, predict)}")
+    else:
+        util.log(f"F1 Score - {mode.value}: {f1_score(y_test, predict, average='macro')}")
+        util.log(f"Precision - {mode.value}: {precision_score(y_test, predict, average='macro')}")
+        util.log(f"Recall - {mode.value}: {recall_score(y_test, predict, average='macro')}")
 
 
 if __name__ == '__main__':

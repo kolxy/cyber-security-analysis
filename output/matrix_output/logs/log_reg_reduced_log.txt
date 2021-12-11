@@ -1,0 +1,68 @@
+2021/12/08 22:15:24 >>> Reading data
+2021/12/08 22:15:31 >>> benign            2218764
+generic            215481
+exploits            44525
+fuzzers             24246
+dos                 16353
+reconnaissance      13987
+analysis             2677
+backdoors            2329
+shellcode            1511
+worms                 174
+Name: attack_cat, dtype: int64
+2021/12/08 22:15:31 >>> Unreduced (benign included) label code mapping
+2021/12/08 22:15:32 >>> {2: 'benign', 7: 'reconnaissance', 4: 'exploits', 3: 'dos', 6: 'generic', 8: 'shellcode', 5: 'fuzzers', 9: 'worms', 1: 'backdoors', 0: 'analysis'}
+2021/12/08 22:15:32 >>> Reduced (no benign) label code mapping
+2021/12/08 22:15:32 >>> {7: 'reconnaissance', 4: 'exploits', 3: 'dos', 6: 'generic', 8: 'shellcode', 5: 'fuzzers', 9: 'worms', 1: 'backdoors', 0: 'analysis'}
+2021/12/08 22:15:56 >>> =============================Fitting=============================
+2021/12/08 22:15:56 >>> Current type: binary
+2021/12/08 22:16:43 >>> Predicting
+2021/12/08 22:16:43 >>> Generating confusion matrix
+2021/12/08 22:16:43 >>> Logistic Regression binary Confusion Matrix
+2021/12/08 22:16:43 >>> [[546809   7481]
+ [  2547  78175]]
+2021/12/08 22:16:43 >>> Accuracy - binary: 0.9842081724439853
+2021/12/08 22:16:44 >>> F1 Score - binary: 0.9397276082174326
+2021/12/08 22:16:44 >>> Precision - binary: 0.9126622770150369
+2021/12/08 22:16:44 >>> Recall - binary: 0.9684472634473873
+2021/12/08 22:17:17 >>> =============================Fitting=============================
+2021/12/08 22:17:17 >>> Current type: binary PCA
+2021/12/08 22:18:00 >>> Predicting
+2021/12/08 22:18:00 >>> Generating confusion matrix
+2021/12/08 22:18:01 >>> Logistic Regression binary PCA Confusion Matrix
+2021/12/08 22:18:01 >>> [[546829   7461]
+ [  2854  77868]]
+2021/12/08 22:18:01 >>> Accuracy - binary PCA: 0.983756212481024
+2021/12/08 22:18:01 >>> F1 Score - binary PCA: 0.9378805306803332
+2021/12/08 22:18:01 >>> Precision - binary PCA: 0.9125619660373379
+2021/12/08 22:18:01 >>> Recall - binary PCA: 0.964644087113798
+2021/12/08 22:18:04 >>> =============================Fitting=============================
+2021/12/08 22:18:04 >>> Current type: multi-class no benign
+2021/12/08 22:19:56 >>> Predicting
+2021/12/08 22:19:56 >>> Generating confusion matrix
+2021/12/08 22:19:56 >>> Logistic Regression multi-class no benign Confusion Matrix
+2021/12/08 22:19:56 >>> [[   35     0    16   558    27     4     9     0     0]
+ [    0     0     8   458    67     6    46     0     0]
+ [    0     0   132  3515   237    36   191     0     0]
+ [    3     0   129  9643   923    93   349     0     0]
+ [    3     0    16   875  4560    55   601     0     0]
+ [    8     0    14  1034   298 52380    66     0     0]
+ [    0     0    37   985   684    22  1771     0     0]
+ [    0     0     0     0   177     0   206     0     0]
+ [    0     0     0    29     2    12     1     0     0]]
+2021/12/08 22:19:56 >>> Accuracy - multi-class no benign: 0.8530894784676486
+2021/12/08 22:20:00 >>> =============================Fitting=============================
+2021/12/08 22:20:00 >>> Current type: multi-class no benign PCA
+2021/12/08 22:21:41 >>> Predicting
+2021/12/08 22:21:41 >>> Generating confusion matrix
+2021/12/08 22:21:41 >>> Logistic Regression multi-class no benign PCA Confusion Matrix
+2021/12/08 22:21:41 >>> [[   38     0    17   554    23     6    11     0     0]
+ [    0     0     9   461    53    15    47     0     0]
+ [    0     0   113  3445   278    75   200     0     0]
+ [    3     0   114  9503   977   166   377     0     0]
+ [    1     0    19   912  4458    73   647     0     0]
+ [   10     0    12  1019   312 52388    59     0     0]
+ [    0     0    32   960   736    21  1750     0     0]
+ [    0     0     0     0   171     0   212     0     0]
+ [    0     0     0    31     1    10     2     0     0]]
+2021/12/08 22:21:41 >>> Accuracy - multi-class no benign PCA: 0.8497155164900836

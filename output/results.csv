@@ -1,0 +1,17 @@
+ML Classifier ,Feature Type,Class Type,Accuracy,Percent Accuracy
+Random Forest,Raw,Binary,0.994708761,99.47087614
+Random Forest,PCA,Binary,0.973934351,97.39343508
+Random Forest,Raw,Multiclass,0.89295452,89.295452
+Random Forest,PCA,Multiclass,0.813759789,81.37597888
+Multilayer Perceptron,Raw,Binary,0.992456835,99.24568355
+Multilayer Perceptron,PCA,Binary,0.992143456,99.21434556
+Multilayer Perceptron,Raw,Multiclass,0.887725501,88.77255014
+Multilayer Perceptron,PCA,Multiclass,0.88738935,88.73893502
+K-Nearest Neighbors,Raw,Binary,0.989897829,98.98978287
+K-Nearest Neighbors,PCA,Binary,0.989826964,98.98269639
+K-Nearest Neighbors,Raw,Multiclass,0.840303283,84.03032831
+K-Nearest Neighbors,PCA,Multiclass,0.840029382,84.00293821
+Logistic Regression,Raw,Binary,0.984208172,98.42081724
+Logistic Regression,PCA,Binary,0.983756212,98.3756212
+Logistic Regression,Raw,Multiclass,0.853089478,85.30894785
+Logistic Regression,PCA,Multiclass,0.849715516,84.97155165

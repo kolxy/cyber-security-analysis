@@ -93,6 +93,10 @@ def run_k_nearest_neighbors(x_train,
         util.log(f"F1 Score - {mode.value}: {f1_score(y_test, predict)}")
         util.log(f"Precision - {mode.value}: {precision_score(y_test, predict)}")
         util.log(f"Recall - {mode.value}: {recall_score(y_test, predict)}")
+    else:
+        util.log(f"F1 Score - {mode.value}: {f1_score(y_test, predict, average='macro')}")
+        util.log(f"Precision - {mode.value}: {precision_score(y_test, predict, average='macro')}")
+        util.log(f"Recall - {mode.value}: {recall_score(y_test, predict, average='macro')}")
 
 
 if __name__ == '__main__':

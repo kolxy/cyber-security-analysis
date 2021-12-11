@@ -1,0 +1,9 @@
+ML Classifier,F1_Score,Feature Type
+Logistic Regression,0.939727608,Raw
+Logistic Regression,0.937880531,PCA
+K-Nearest Neighbors,0.960236042,Raw
+K-Nearest Neighbors,0.959968272,PCA
+Multilayer Perceptron,0.969976934,Raw
+Multilayer Perceptron,0.96901223,PCA
+Random Forest,0.979146496,Raw
+Random Forest,0.894291809,PCA
