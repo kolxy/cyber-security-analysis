@@ -1,6 +1,6 @@
 # Cyber Security Dataset Analysis Project
 
-This is the codebase for our Computer Science 575 projects at WSU. We are performing attack detection and classification
+This is the codebase for our Computer Science 575 class project at WSU. We are performing attack detection and classification
 using a variety of methods such as MLP, logistic regression, random forest, and k-nearest neighbors. We are also toying with
 Matrix Profiling to see if it has any use as an attack detector on the UNSW-NB15 Dataset by 
 [Nour Moustafa and Jill Slay](https://cloudstor.aarnet.edu.au/plus/index.php/s/2DhnLGDdEECo4ys?path=%2FUNSW-NB15%20-%20CSV%20Files). 
