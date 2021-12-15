@@ -168,22 +168,23 @@ def analyze(nw:tdp.network_window, suffix, fit, load, featSizeFactor, bucketsRng
 
     # benign_malicious_latent(ae, benign, hetero)
     metric = keras.losses.CosineSimilarity()
-    # da.line_plot_n_malicious(ae, nw, metric, ylabel="Cosine Similarity", name="Decoded Analysis")
-    lossDf = da.get_lossDf(ae, nw,)
-    da.bucket_probs(lossDf, suffix=suffix, rngArgs=bucketsRngArgs,)
-    # da.dist_plots(lossDf)
+    # da.line_plot_n_malicious(ae, nw, metric, ylabel="Cosine Similarity", name="Decoded Analysis using " + suffix)
+    # lossDf = da.get_lossDf(ae, nw,)
+    # da.bucket_probs(lossDf, suffix=suffix, rngArgs=bucketsRngArgs,)
+    lossDf = da.get_lossDf(ae, nw, nMaliciouses=[0,1,2,4,8,12,16])
+    da.dist_plots(lossDf, suffix=suffix)
     return ae
 
 if __name__ == "__main__":
     if gv.DEBUG: gv.enable_tf_debug()
+    # da.plot_n_mal_sizes()
     nw = tdp.network_window.get_window_data(NTIMESTEPS, firstN=_NDATA)
     load = True
     # load = False
     fit = False
     # fit=True
-    # ae = analyze(nw, specificNnSuffix[spec_nn.FULL], fit, load, featSizeFactor=.68, bucketsRngArgs=None)
-    # nw.perform_pca()
-    ae = analyze(nw, specificNnSuffix[spec_nn.PCA], fit, load, featSizeFactor=1., bucketsRngArgs=(-1,-.6999,.01))
-
+    # ae = analyze(nw, specificNnSuffix[spec_nn.FULL], fit, load, featSizeFactor=1., bucketsRngArgs=None)
+    nw.perform_pca() #13 components for only benign
+    ae = analyze(nw, specificNnSuffix[spec_nn.PCA], fit, load, featSizeFactor=1.455, bucketsRngArgs=(-1,1.001,.01))
     plt.show()
     exit()

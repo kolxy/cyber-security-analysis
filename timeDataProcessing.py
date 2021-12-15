@@ -48,8 +48,11 @@ class network_window:
     def perform_pca(self):
         pca = PCA(0.99, random_state=42)
         shape = self.windows.shape
-        self.windows = np.reshape(self.windows,(-1, self.windows.shape[-1]))
-        pca.fit(self.get_n_malicious(0))
+        pcaShape = (-1, self.windows.shape[-1])
+        benign = self.get_n_malicious(0)
+        benign = np.reshape(benign, pcaShape)
+        self.windows = np.reshape(self.windows,pcaShape)
+        pca.fit(benign)
         self.windows = pca.transform(self.windows)
         self.windows = np.reshape(self.windows, shape[:2] + (self.windows.shape[-1],))
         print("%d PCA components" %(self.windows.shape[-1]))

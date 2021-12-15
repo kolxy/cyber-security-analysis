@@ -16,6 +16,7 @@ _defaultDir = fp.images.directory.distributionAnalysis
 
 _defPlotKwArgs = {"tight_layout":True}
 
+
 def kolm_smirnov_analysis(data1, data2, nameSuffix):
     length = 10
     size = (length,length)
@@ -93,10 +94,23 @@ def line_plot_n_malicious(
     ax.set_title(name)
     ax.set_xlabel("Fraction of Malicious Packets")
     ax.set_ylabel(ylabel)
-    sns.despine(ax=ax, top=False, right=False)
+    # sns.despine(ax=ax, top=False, right=False)
     if not gv.DEBUG:
         plt.savefig(fp.images.directory.distributionAnalysis + name.replace(" ", "") + ".png")
+    plt.figure()
     return vals
+
+def plot_n_mal_sizes():
+    sizes = [173685, 49750, 21443, 12050, 8816, 7184, 6441,5710,5482,4836,4575,3903,3514,2973,2377,2423,2342]
+    fractions = [x/16. for x in range(len(sizes))]
+    plt.figure()
+    ax = sns.lineplot(fractions,sizes)
+    ax.set_title("Data Amount Given Malicous Packet Fracton")
+    ax.set_ylabel("Window Count")
+    ax.set_xlabel("Fraction of Malicious Packets")
+    plt.subplots_adjust(left=.14)
+    plt.savefig(fp.images.directory.distributionAnalysis + "dataSizeLine.png")
+    return ax
 
 def get_losses_per_batch(
         ae:autoencoder.autoencoder,
@@ -119,9 +133,10 @@ def get_losses_per_batch(
 def get_lossDf(
         ae: autoencoder.autoencoder,
         networkWindow: tdp.network_window,
-        metric="loss", nGroups=20 if gv.DEBUG else 100,
+        metric="loss", nGroups=20 if gv.DEBUG else 100, nMaliciouses=None
     ):
-    nMaliciouses = [0,8,16] if gv.DEBUG else [i for i in range(0,17)] # [0,4,8,12,16]
+    if nMaliciouses is None:
+        nMaliciouses = [0,8,16] if gv.DEBUG else [i for i in range(0,17)] # [0,4,8,12,16]
     df = {}
     for nMalicious in nMaliciouses:
         print("%s malicious packets" %(nMalicious))
@@ -130,18 +145,22 @@ def get_lossDf(
     df = pd.DataFrame(df)
     return df
 
-def dist_plots(lossDf:pd.DataFrame, name="", ylabel="",
+def dist_plots(lossDf:pd.DataFrame, suffix="", ylabel="",
 ):
     lossDf.sort_index(inplace=True)
     ax = sns.displot(lossDf, kind="hist", multiple='stack')
-    ax = sns.displot(lossDf, kind="kde", fill=True, legend="# malicious")
+    plt.figure()
+    ax = sns.displot(lossDf, kind="kde", fill=True, legend="# malicious", ax=ax, height=4, aspect=2)
     ax.set_xlabels("Cosine Similarity")
     # ax.suptitle("Distribution of Frame (Size 16) With Number of Malicious Packets")
-    ax.set(xlim=(-1,1))
-    plt.title("Distribution of Frame (Size 16) With Number of Malicious Packets")
+    ax.set(xlim=(-1,0.) if suffix=="PCA" else (-1,-0.9))
+    plt.title("Loss Given the Number of Malicious Packets using " + suffix)
+    plt.subplots_adjust(top=.9, bottom=.15)
     # plt.legend(nMaliciouses, "Number of Malicious Packets")
     # ax.set_xlabel("Cosine Similarity")
     # sns.despine(ax=ax, top=False, right=False)
+    if not gv.DEBUG:
+        plt.savefig(fp.images.directory.distributionAnalysis + "KdeLoss" + suffix.replace(' ','') + ".png")
 
     return ax
 
@@ -168,17 +187,21 @@ def bucket_probs(
     for col in lossDf.columns:
         dfCounts[col] = pd.cut(lossDf[col], bins=bins, retbins=True)[0].value_counts()
 
-    dfCounts.sort_index(inplace=True)
+    sums = dfCounts.sum(axis=1)
+    sums = sums[sums > 2]
+    normedDf = dfCounts.loc[sums.index].div(sums, axis=0).dropna()
+    normedDf.sort_index(inplace=True)
+
     fig = plt.figure(figsize=(9.5,6), **_defPlotKwArgs)
-    ax = sns.heatmap(dfCounts)
+    ax = sns.heatmap(normedDf)
     ax.set_title("Heatmap for N/16 Malicious Packets using " + suffix)
     ax.set_ylabel("Cosine Similarity Range")
     ax.set_xlabel("Number of Malicious Packets")
 
     name = "cosSimHeatMapNormedProb" + suffix
-    plt.savefig(fp.images.directory.distributionAnalysis + name + ".png")
+    if not gv.DEBUG:
+        plt.savefig(fp.images.directory.distributionAnalysis + name.replace(' ','') + ".png")
 
-    normedDf = dfCounts.div(dfCounts.sum(axis=1), axis=0).dropna()
     colSize = len(normedDf.columns)
     pivot = math.ceil(colSize / 2)
 
