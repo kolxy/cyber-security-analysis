@@ -7,6 +7,7 @@ from tensorflow.keras import layers as l
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+from enum import Enum
 
 import constants
 import util
@@ -24,11 +25,19 @@ _LOSSFUNC = keras.losses.CosineSimilarity()
 _KERNELINIT = keras.initializers.RandomNormal(stddev=0.02)
 _METRICS = [keras.metrics.MeanAbsoluteError(),
             keras.losses.CosineSimilarity(),]
-_NDATA = 1000 if gv.DEBUG else None
+_NDATA = 100000 if gv.DEBUG else None
 
 _UPSAMPLE_KW = {"strides": 1, "up_size": 2}
 _DOWNSAMPLE_KW = {"strides": 2, "up_size": 1}
 
+class spec_nn(Enum):
+    PCA = 0
+    FULL = 1
+
+specificNnSuffix = {
+    spec_nn.PCA : "PCA",
+    spec_nn.FULL : "All Dimensions"
+}
 
 def conv_block(
     x,
@@ -81,31 +90,28 @@ class autoencoder():
         return func(data, pred)
 
     @staticmethod
-    def _enc_file_name(dir):
-        return dir + autoencoder.encoderName + keras_model_paths.extensions.kerasModel
+    def _enc_file_name(suffix, dir):
+        return dir + autoencoder.encoderName + suffix + keras_model_paths.extensions.kerasModel
     @staticmethod
-    def _dec_file_name(dir):
-        return dir + autoencoder.decoderName + keras_model_paths.extensions.kerasModel
+    def _dec_file_name(suffix, dir):
+        return dir + autoencoder.decoderName + suffix + keras_model_paths.extensions.kerasModel
 
-    def save(self, dir = _defaultDir):
-        self.encoder.save(autoencoder._enc_file_name(dir))
-        self.decoder.save(autoencoder._dec_file_name(dir))
+    def save(self,suffix,  dir = _defaultDir):
+        self.encoder.save(autoencoder._enc_file_name(suffix, dir))
+        self.decoder.save(autoencoder._dec_file_name(suffix, dir))
 
     @staticmethod
-    def load_ae(dir = _defaultDir):
+    def load_ae(suffix, dir = _defaultDir):
         return autoencoder(
-            keras.models.load_model(autoencoder._enc_file_name(dir)),
-            keras.models.load_model(autoencoder._dec_file_name(dir))
+            keras.models.load_model(autoencoder._enc_file_name(suffix, dir)),
+            keras.models.load_model(autoencoder._dec_file_name(suffix, dir))
         )
 
     @staticmethod
-    def create_ae(nInputs):
+    def create_ae(nInputs, featSizeFactor):
         aeLayerDefArgs = {"use_bn":True}
-        visualFeatSizeFactor = .68
-        quantitativeSizeFactor = .8
 
         inLayer = l.Input(shape=(NTIMESTEPS, nInputs))
-        featSizeFactor = visualFeatSizeFactor #.7 and 14 give -.96; .68 and 12 give -.95
         featSizesDec = [nInputs]
         for i in range(4):
             featSizesDec.append(np.round(featSizesDec[-1]*featSizeFactor).astype(int))
@@ -133,19 +139,19 @@ class autoencoder():
         return autoencoder(encoder, decoder)
 
 
-def train_ae(ae:autoencoder, windows):
+def train_ae(ae:autoencoder, windows, suffix):
     stepsPerEpoch = 2 if gv.DEBUG else None
-    epochs = 2 if gv.DEBUG else 10
+    epochs = 2 if gv.DEBUG else 50
     useValidation=True
 
-    callbacks = [keras.callbacks.EarlyStopping(monitor="val_loss" if useValidation else "loss", patience=1)]
+    callbacks = [keras.callbacks.EarlyStopping(monitor="val_loss" if useValidation else "loss", patience=3)]
     ae.model.fit(
         windows, windows, validation_split=.25 if useValidation else 0., callbacks=callbacks,
         steps_per_epoch=stepsPerEpoch, epochs=epochs
     )
 
     if not gv.DEBUG:
-        ae.save()
+        ae.save(suffix)
     return ae
 
 def benign_malicious_latent(ae:autoencoder, benign, hetero):
@@ -154,25 +160,30 @@ def benign_malicious_latent(ae:autoencoder, benign, hetero):
     # da.kolm_smirnov_analysis(benignOut, heteroOut, "Benign versus Malicious")
     return
 
+def analyze(nw:tdp.network_window, suffix, fit, load, featSizeFactor, bucketsRngArgs):
+    ae = autoencoder.load_ae(suffix) if load else autoencoder.create_ae(nw.windows.shape[-1], featSizeFactor)
+    print(ae.encoder.summary())
+    print(ae.decoder.summary())
+    if fit: ae = train_ae(ae, nw.get_n_malicious(0), suffix)
 
+    # benign_malicious_latent(ae, benign, hetero)
+    metric = keras.losses.CosineSimilarity()
+    # da.line_plot_n_malicious(ae, nw, metric, ylabel="Cosine Similarity", name="Decoded Analysis")
+    lossDf = da.get_lossDf(ae, nw,)
+    da.bucket_probs(lossDf, suffix=suffix, rngArgs=bucketsRngArgs,)
+    # da.dist_plots(lossDf)
+    return ae
 
 if __name__ == "__main__":
     if gv.DEBUG: gv.enable_tf_debug()
     nw = tdp.network_window.get_window_data(NTIMESTEPS, firstN=_NDATA)
-    benign = nw.get_homogeneous_benign()
-    hetero = nw.get_only_heterogeneous()
-
     load = True
     # load = False
     fit = False
     # fit=True
-
-    ae = autoencoder.load_ae() if load else autoencoder.create_ae(nw.windows.shape[-1])
-    if fit: ae = train_ae(ae, benign.windows)
-
-    # benign_malicious_latent(ae, benign, hetero)
-    metric = keras.losses.CosineSimilarity()
-    da.line_plot_n_malicious(ae, nw, metric, ylabel="Cosine Similarity", name="Decoded Analysis")
+    # ae = analyze(nw, specificNnSuffix[spec_nn.FULL], fit, load, featSizeFactor=.68, bucketsRngArgs=None)
+    # nw.perform_pca()
+    ae = analyze(nw, specificNnSuffix[spec_nn.PCA], fit, load, featSizeFactor=1., bucketsRngArgs=(-1,-.6999,.01))
 
     plt.show()
     exit()

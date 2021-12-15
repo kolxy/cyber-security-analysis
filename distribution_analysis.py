@@ -1,3 +1,6 @@
+import math
+
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -94,3 +97,91 @@ def line_plot_n_malicious(
     if not gv.DEBUG:
         plt.savefig(fp.images.directory.distributionAnalysis + name.replace(" ", "") + ".png")
     return vals
+
+def get_losses_per_batch(
+        ae:autoencoder.autoencoder,
+        arr3d:np.ndarray,
+        nGroups, metricName:str = "loss"
+):
+    step = arr3d.shape[0]/nGroups
+    print("Doing %d steps and %d groups for %d samples." %(step, nGroups, arr3d.shape[0]))
+    end=0.
+    losses = []
+    for i in range(0,nGroups):
+        pivot1 = int(end)
+        end += step
+        pivot = min(int(end), arr3d.shape[0])
+        # pivot = i+1
+        metrics = ae.model.evaluate(arr3d[pivot1:pivot], arr3d[pivot1:pivot], return_dict=True, verbose=0)
+        losses.append(metrics[metricName])
+    return losses
+
+def get_lossDf(
+        ae: autoencoder.autoencoder,
+        networkWindow: tdp.network_window,
+        metric="loss", nGroups=20 if gv.DEBUG else 100,
+    ):
+    nMaliciouses = [0,8,16] if gv.DEBUG else [i for i in range(0,17)] # [0,4,8,12,16]
+    df = {}
+    for nMalicious in nMaliciouses:
+        print("%s malicious packets" %(nMalicious))
+        df[nMalicious] = get_losses_per_batch(ae, networkWindow.get_n_malicious(nMalicious), nGroups, metricName=metric)
+
+    df = pd.DataFrame(df)
+    return df
+
+def dist_plots(lossDf:pd.DataFrame, name="", ylabel="",
+):
+    lossDf.sort_index(inplace=True)
+    ax = sns.displot(lossDf, kind="hist", multiple='stack')
+    ax = sns.displot(lossDf, kind="kde", fill=True, legend="# malicious")
+    ax.set_xlabels("Cosine Similarity")
+    # ax.suptitle("Distribution of Frame (Size 16) With Number of Malicious Packets")
+    ax.set(xlim=(-1,1))
+    plt.title("Distribution of Frame (Size 16) With Number of Malicious Packets")
+    # plt.legend(nMaliciouses, "Number of Malicious Packets")
+    # ax.set_xlabel("Cosine Similarity")
+    # sns.despine(ax=ax, top=False, right=False)
+
+    return ax
+
+class bucket:
+    def __init__(self, start, stop, count=0):
+        self.start = start
+        self.stop = stop
+        self.count =  count
+        self.rng = (start,stop)
+
+def get_bucket_dict(start, stop, step):
+    return {key: bucket(start, start + step) for key in np.arange(start,stop,step)}
+
+
+def bucket_probs(
+        lossDf:pd.DataFrame, suffix="", rngArgs = (-1,1.00001,.01)
+):
+    if rngArgs is None:
+        rngArgs = (-1, 1.00001, .01)
+    if suffix is None:
+        suffix = ""
+    dfCounts = pd.DataFrame()
+    bins = np.arange(*rngArgs)
+    for col in lossDf.columns:
+        dfCounts[col] = pd.cut(lossDf[col], bins=bins, retbins=True)[0].value_counts()
+
+    dfCounts.sort_index(inplace=True)
+    fig = plt.figure(figsize=(9.5,6), **_defPlotKwArgs)
+    ax = sns.heatmap(dfCounts)
+    ax.set_title("Heatmap for N/16 Malicious Packets using " + suffix)
+    ax.set_ylabel("Cosine Similarity Range")
+    ax.set_xlabel("Number of Malicious Packets")
+
+    name = "cosSimHeatMapNormedProb" + suffix
+    plt.savefig(fp.images.directory.distributionAnalysis + name + ".png")
+
+    normedDf = dfCounts.div(dfCounts.sum(axis=1), axis=0).dropna()
+    colSize = len(normedDf.columns)
+    pivot = math.ceil(colSize / 2)
+
+    normedDf[normedDf.columns[:pivot]].to_latex(fp.miscDir + name + ".tex", index=True, float_format="%.3f")
+    normedDf[normedDf.columns[pivot:]].to_latex(fp.miscDir + name + "rest.tex", index=True, float_format="%.3f")
+    return normedDf

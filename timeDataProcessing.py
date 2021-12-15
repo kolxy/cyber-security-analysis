@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing as skpp
+from sklearn.decomposition import PCA
+
 from enum import Enum
 
 import util
@@ -42,6 +44,16 @@ class network_window:
         self.windows = packetWindows
         self.nMalicious = nMaliciousGivenWindow
         self.windowType = self.get_window_type()
+
+    def perform_pca(self):
+        pca = PCA(0.99, random_state=42)
+        shape = self.windows.shape
+        self.windows = np.reshape(self.windows,(-1, self.windows.shape[-1]))
+        pca.fit(self.get_n_malicious(0))
+        self.windows = pca.transform(self.windows)
+        self.windows = np.reshape(self.windows, shape[:2] + (self.windows.shape[-1],))
+        print("%d PCA components" %(self.windows.shape[-1]))
+        return
 
     def get_window_type(self):
         if self.nMalicious.sum(axis=-1) == 0:
